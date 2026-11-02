@@ -12,10 +12,19 @@ namespace Coop.Session
 {
     public sealed class SessionController : MonoBehaviour
     {
-        public NetworkManager Network { get; private set; }
-        public SessionState State { get; private set; }
+        public NetworkManager Network
+        {
+            get; private set;
+        }
+        public SessionState State
+        {
+            get; private set;
+        }
         public string Status { get; private set; } = "Host a session or join by address.";
-        public bool IsBusy { get; private set; }
+        public bool IsBusy
+        {
+            get; private set;
+        }
         public bool LocalCanPlay => Network && CanPlay(Network.LocalClientId);
         public string RequestedBuildVersion { get; set; } = ApprovalPolicy.BuildVersion;
         public event Action Changed;
@@ -28,11 +37,13 @@ namespace Coop.Session
         private readonly Dictionary<ulong, JoinPayload> reservations = new Dictionary<ulong, JoinPayload>();
         private readonly Dictionary<ulong, float> reservedAt = new Dictionary<ulong, float>();
         private readonly Dictionary<ulong, float> loadingSince = new Dictionary<ulong, float>();
+        private readonly HashSet<ulong> confirmedClients = new HashSet<ulong>();
         private readonly LoadingBarrier loadingBarrier = new LoadingBarrier();
         private float attemptStarted;
         private float nextRefresh;
         private int operation;
         private bool leaving;
+        private bool locallyStopped = true;
         private bool sceneEventsAttached;
 
         public void Initialize(NetworkManager manager, SessionState prefab, IConnectionTransport connectionTransport,
@@ -62,15 +73,18 @@ namespace Coop.Session
 
         private async Task Connect(bool host, string address, ushort port, string playerName)
         {
-            if (IsBusy || Network.IsListening || Network.ShutdownInProgress) return;
+            if (IsBusy || Network.IsListening || Network.ShutdownInProgress)
+                return;
             int attempt = ++operation;
+            locallyStopped = false;
             IsBusy = true;
             attemptStarted = Time.realtimeSinceStartup;
             SetStatus(host ? "Starting host..." : "Connecting...");
             try
             {
                 await transport.PrepareAsync(host, address, port, ApprovalPolicy.MaxPlayers);
-                if (attempt != operation) return;
+                if (attempt != operation)
+                    return;
                 string displayName = string.IsNullOrWhiteSpace(identity.DisplayName) ? playerName : identity.DisplayName;
                 displayName = string.IsNullOrWhiteSpace(displayName) ? "Player" : displayName.Trim();
                 // Limit UTF-8 bytes too: FixedString64Bytes has 61 usable bytes.
@@ -81,16 +95,19 @@ namespace Coop.Session
                 if (host)
                 {
                     string error = ApprovalPolicy.RejectReason(payload, 0, new HashSet<string>());
-                    if (error.Length > 0) throw new InvalidOperationException(error);
+                    if (error.Length > 0)
+                        throw new InvalidOperationException(error);
                 }
                 Network.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload));
                 bool started = host ? Network.StartHost() : Network.StartClient();
-                if (!started) throw new InvalidOperationException("Transport could not start. Check address and port.");
+                if (!started)
+                    throw new InvalidOperationException("Transport could not start. Check address and port.");
                 AttachSceneEvents();
             }
             catch (Exception exception)
             {
-                if (attempt == operation) Stop("Connection failed: " + exception.Message);
+                if (attempt == operation)
+                    Stop("Connection failed: " + exception.Message);
                 Debug.LogWarning(exception);
             }
         }
@@ -100,18 +117,24 @@ namespace Coop.Session
             JoinPayload payload = null;
             if (request.Payload != null && request.Payload.Length <= 512)
             {
-                try { payload = JsonUtility.FromJson<JoinPayload>(Encoding.UTF8.GetString(request.Payload)); }
+                try
+                {
+                    payload = JsonUtility.FromJson<JoinPayload>(Encoding.UTF8.GetString(request.Payload));
+                }
                 catch (ArgumentException) { }
             }
             var ids = new HashSet<string>();
-            foreach (JoinPayload reserved in reservations.Values) ids.Add(reserved.playerId);
+            foreach (JoinPayload reserved in reservations.Values)
+                ids.Add(reserved.playerId);
             string reason = ApprovalPolicy.RejectReason(payload, reservations.Count, ids);
-            if (reason.Length == 0 && !transport.ValidateIdentity(request.ClientNetworkId, payload.playerId)) reason = "Invalid player identity.";
+            if (reason.Length == 0 && !transport.ValidateIdentity(request.ClientNetworkId, payload.playerId))
+                reason = "Invalid player identity.";
             response.Approved = reason.Length == 0;
             response.CreatePlayerObject = false;
             response.Pending = false;
             response.Reason = reason;
-            if (!response.Approved) return;
+            if (!response.Approved)
+                return;
             reservations[request.ClientNetworkId] = payload;
             reservedAt[request.ClientNetworkId] = Time.realtimeSinceStartup;
         }
@@ -122,7 +145,8 @@ namespace Coop.Session
             var state = Instantiate(statePrefab);
             state.NetworkObject.Spawn(false);
             // The host connection callback can run before OnServerStarted.
-            foreach (ulong clientId in Network.ConnectedClientsIds) AddPlayer(clientId);
+            foreach (ulong clientId in Network.ConnectedClientsIds)
+                AddPlayer(clientId);
         }
 
         private void BindState(SessionState state)
@@ -135,7 +159,9 @@ namespace Coop.Session
 
         private void Connected(ulong clientId)
         {
-            if (Network.IsServer) AddPlayer(clientId);
+            confirmedClients.Add(clientId);
+            if (Network.IsServer)
+                AddPlayer(clientId);
             if (clientId == Network.LocalClientId)
             {
                 IsBusy = false;
@@ -146,7 +172,8 @@ namespace Coop.Session
 
         private void AddPlayer(ulong clientId)
         {
-            if (!State || State.Find(clientId) >= 0 || !reservations.TryGetValue(clientId, out JoinPayload profile)) return;
+            if (!State || State.Find(clientId) >= 0 || !reservations.TryGetValue(clientId, out JoinPayload profile))
+                return;
             State.Players.Add(new PlayerRecord
             {
                 ClientId = clientId,
@@ -155,17 +182,20 @@ namespace Coop.Session
                 Ready = false,
                 Rtt = 0
             });
-            if (State.Phase.Value != SessionPhase.Lobby) loadingSince[clientId] = Time.realtimeSinceStartup;
+            if (State.Phase.Value != SessionPhase.Lobby)
+                loadingSince[clientId] = Time.realtimeSinceStartup;
             loadingBarrier.Add(clientId);
             UpdatePresence();
         }
 
         public void StartGame()
         {
-            if (!Network.IsServer || !State || State.Phase.Value != SessionPhase.Lobby) return;
+            if (!Network.IsServer || !State || State.Phase.Value != SessionPhase.Lobby)
+                return;
             State.Phase.Value = SessionPhase.Loading;
             var participants = new List<ulong>();
-            foreach (PlayerRecord player in State.Players) participants.Add(player.ClientId);
+            foreach (PlayerRecord player in State.Players)
+                participants.Add(player.ClientId);
             loadingBarrier.Begin(participants);
             for (int i = 0; i < State.Players.Count; i++)
             {
@@ -186,14 +216,16 @@ namespace Coop.Session
 
         private void AttachSceneEvents()
         {
-            if (sceneEventsAttached || Network.SceneManager == null) return;
+            if (sceneEventsAttached || Network.SceneManager == null)
+                return;
             Network.SceneManager.OnSceneEvent += SceneChanged;
             sceneEventsAttached = true;
         }
 
         private void SceneChanged(SceneEvent sceneEvent)
         {
-            if (!Network.IsServer || !State || State.Phase.Value == SessionPhase.Lobby) return;
+            if (!Network.IsServer || !State || State.Phase.Value == SessionPhase.Lobby)
+                return;
             if (sceneEvent.SceneEventType == SceneEventType.LoadComplete && sceneEvent.SceneName == "Arena")
                 MarkReady(sceneEvent.ClientId);
             else if (sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
@@ -201,7 +233,8 @@ namespace Coop.Session
             else if (sceneEvent.SceneEventType == SceneEventType.LoadEventCompleted)
             {
                 foreach (ulong clientId in sceneEvent.ClientsThatTimedOut)
-                    if (clientId != Network.LocalClientId) Network.DisconnectClient(clientId, "Scene loading timed out.");
+                    if (clientId != Network.LocalClientId)
+                        Network.DisconnectClient(clientId, "Scene loading timed out.");
                 TryOpenBarrier();
             }
         }
@@ -210,7 +243,8 @@ namespace Coop.Session
         {
             AddPlayer(clientId);
             int index = State.Find(clientId);
-            if (index < 0) return;
+            if (index < 0)
+                return;
             PlayerRecord player = State.Players[index];
             player.Ready = true;
             State.Players[index] = player;
@@ -227,7 +261,8 @@ namespace Coop.Session
 
         private void TryOpenBarrier()
         {
-            if (!State || State.Phase.Value != SessionPhase.Loading || !loadingBarrier.TryOpen()) return;
+            if (!State || State.Phase.Value != SessionPhase.Loading || !loadingBarrier.TryOpen())
+                return;
             // All screens target a shared network timestamp, not local packet arrival.
             State.PlayAt.Value = Network.ServerTime.Time + 0.75;
             State.Phase.Value = SessionPhase.Playing;
@@ -242,18 +277,21 @@ namespace Coop.Session
 
         private void Disconnected(ulong clientId)
         {
-            if (leaving) return;
+            if (leaving || locallyStopped)
+                return;
             if (Network.IsServer)
             {
                 PlayerDisconnected?.Invoke(clientId);
                 reservations.Remove(clientId);
+                confirmedClients.Remove(clientId);
                 reservedAt.Remove(clientId);
                 loadingSince.Remove(clientId);
                 loadingBarrier.Remove(clientId);
                 if (State)
                 {
                     int index = State.Find(clientId);
-                    if (index >= 0) State.Players.RemoveAt(index);
+                    if (index >= 0)
+                        State.Players.RemoveAt(index);
                 }
                 TryOpenBarrier();
                 UpdatePresence();
@@ -261,18 +299,24 @@ namespace Coop.Session
             else if (clientId == Network.LocalClientId)
             {
                 string reason = Network.DisconnectReason;
-                Stop(string.IsNullOrWhiteSpace(reason) ? "Connection lost or host left the session." : reason);
+                Stop(DisconnectMessages.ForUser(reason, IsBusy));
             }
         }
 
-        private void TransportFailed() => Stop("Network transport failed. Check your connection.");
+        private void TransportFailed()
+        {
+            if (!locallyStopped)
+                Stop("Network transport failed. Check your connection.");
+        }
         public void Leave() => Stop("You left the session.");
         public void Leave(string reason) => Stop(reason);
 
         private void Stop(string message)
         {
-            if (leaving) return;
+            if (leaving)
+                return;
             leaving = true;
+            locallyStopped = true;
             operation++;
             IsBusy = false;
             if (State)
@@ -280,13 +324,16 @@ namespace Coop.Session
                 State.Players.OnListChanged -= RosterChanged;
                 State.Phase.OnValueChanged -= PhaseChanged;
             }
-            if (sceneEventsAttached && Network.SceneManager != null) Network.SceneManager.OnSceneEvent -= SceneChanged;
+            if (sceneEventsAttached && Network.SceneManager != null)
+                Network.SceneManager.OnSceneEvent -= SceneChanged;
             sceneEventsAttached = false;
             stats?.Flush();
-            if (Network.IsListening) Network.Shutdown();
+            if (Network.IsListening)
+                Network.Shutdown();
             transport?.Shutdown();
             State = null;
             reservations.Clear();
+            confirmedClients.Clear();
             reservedAt.Clear();
             loadingSince.Clear();
             loadingBarrier.Reset();
@@ -296,40 +343,59 @@ namespace Coop.Session
 
         private void Update()
         {
-            if (Network == null) return;
+            if (Network == null)
+                return;
             transport?.Tick();
             if (IsBusy && Time.realtimeSinceStartup - attemptStarted > 20)
             {
                 Stop("Connection timed out. Check host address, port and firewall.");
                 return;
             }
-            if (!Network.IsServer || !State || Time.realtimeSinceStartup < nextRefresh) return;
+            if (!Network.IsServer || !State || Time.realtimeSinceStartup < nextRefresh)
+                return;
             nextRefresh = Time.realtimeSinceStartup + 1f;
             var timedOut = new List<ulong>();
             foreach (var pending in reservedAt)
-                if ((!Network.ConnectedClients.TryGetValue(pending.Key, out NetworkClient client) || !client.IsConnected) &&
-                    Time.realtimeSinceStartup - pending.Value > 20) timedOut.Add(pending.Key);
+                if (!confirmedClients.Contains(pending.Key) && Time.realtimeSinceStartup - pending.Value > 20)
+                    timedOut.Add(pending.Key);
             foreach (ulong clientId in timedOut)
             {
-                if (Network.ConnectedClients.ContainsKey(clientId)) Network.DisconnectClient(clientId, "Connection synchronization timed out.");
+                if (Network.ConnectedClients.ContainsKey(clientId))
+                    Network.DisconnectClient(clientId, "Connection synchronization timed out.");
                 reservations.Remove(clientId);
                 reservedAt.Remove(clientId);
             }
             timedOut.Clear();
             foreach (var pending in loadingSince)
-                if (pending.Key != Network.LocalClientId && Time.realtimeSinceStartup - pending.Value > 45) timedOut.Add(pending.Key);
-            foreach (ulong clientId in timedOut) Network.DisconnectClient(clientId, "Scene loading timed out.");
+                if (pending.Key != Network.LocalClientId && Time.realtimeSinceStartup - pending.Value > 45)
+                    timedOut.Add(pending.Key);
+            foreach (ulong clientId in timedOut)
+                Network.DisconnectClient(clientId, "Scene loading timed out.");
             for (int i = 0; i < State.Players.Count; i++)
             {
                 PlayerRecord player = State.Players[i];
                 player.Rtt = player.ClientId == Network.LocalClientId ? 0 : (uint)Math.Min(transport.GetRtt(player.ClientId), uint.MaxValue);
-                if (!player.Equals(State.Players[i])) State.Players[i] = player;
+                if (!player.Equals(State.Players[i]))
+                    State.Players[i] = player;
             }
         }
 
-        private void RosterChanged(NetworkListEvent<PlayerRecord> _) => Changed?.Invoke();
-        private void PhaseChanged(SessionPhase previous, SessionPhase current) => Changed?.Invoke();
-        private void SetStatus(string message) { Status = message; Changed?.Invoke(); }
+        private void RosterChanged(NetworkListEvent<PlayerRecord> _)
+        {
+            UpdatePresence();
+            Changed?.Invoke();
+        }
+        private void PhaseChanged(SessionPhase previous, SessionPhase current)
+        {
+            UpdatePresence();
+            Changed?.Invoke();
+        }
+        private void SetStatus(string message)
+        {
+            Status = message;
+            Debug.Log("[Session] " + message);
+            Changed?.Invoke();
+        }
         private void UpdatePresence() => transport?.SetSessionState(State && State.Phase.Value == SessionPhase.Playing, State ? State.Players.Count : 0, ApprovalPolicy.MaxPlayers);
 
         private void OnApplicationQuit() => stats?.Flush();
@@ -337,7 +403,8 @@ namespace Coop.Session
         private void OnDestroy()
         {
             SessionState.Spawned -= BindState;
-            if (!Network) return;
+            if (!Network)
+                return;
             Network.ConnectionApprovalCallback -= Approve;
             Network.OnServerStarted -= ServerStarted;
             Network.OnClientConnectedCallback -= Connected;

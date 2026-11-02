@@ -8,18 +8,23 @@ namespace Coop.Session
     {
         private readonly HashSet<ulong> participants = new HashSet<ulong>();
         private readonly HashSet<ulong> pending = new HashSet<ulong>();
-        public bool IsLoading { get; private set; }
+        public bool IsLoading
+        {
+            get; private set;
+        }
 
         public void Begin(IEnumerable<ulong> clients)
         {
             Reset();
             IsLoading = true;
-            foreach (ulong client in clients) Add(client);
+            foreach (ulong client in clients)
+                Add(client);
         }
 
         public void Add(ulong client)
         {
-            if (IsLoading && participants.Add(client)) pending.Add(client);
+            if (IsLoading && participants.Add(client))
+                pending.Add(client);
         }
 
         public void MarkReady(ulong client) => pending.Remove(client);
@@ -32,7 +37,8 @@ namespace Coop.Session
 
         public bool TryOpen()
         {
-            if (!IsLoading || participants.Count == 0 || pending.Count != 0) return false;
+            if (!IsLoading || participants.Count == 0 || pending.Count != 0)
+                return false;
             IsLoading = false;
             return true;
         }

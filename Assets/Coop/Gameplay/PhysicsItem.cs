@@ -36,7 +36,8 @@ namespace Coop.Gameplay
             Active.Add(this);
             Holder.OnValueChanged += OnHolderChanged;
             ApplyPhysicsMode();
-            if (IsServer) Debug.Log($"[World] Spawn item={NetworkObjectId} owner={OwnerClientId} holder={Holder.Value}");
+            if (IsServer)
+                Debug.Log($"[World] Spawn item={NetworkObjectId} owner={OwnerClientId} holder={Holder.Value}");
         }
 
         public override void OnNetworkDespawn()
@@ -60,11 +61,13 @@ namespace Coop.Gameplay
 
         public bool TryGrab(PlayerAvatar player)
         {
-            if (!IsServer || Holder.Value != Nobody || player.HeldItem.Value != Nobody) return false;
+            if (!IsServer || Holder.Value != Nobody || player.HeldItem.Value != Nobody)
+                return false;
             // All RPCs execute serially on the host. Commit both facts before returning.
             Holder.Value = player.OwnerClientId;
             player.HeldItem.Value = NetworkObjectId;
-            NetworkObject.ChangeOwnership(player.OwnerClientId);
+            if (OwnerClientId != player.OwnerClientId)
+                NetworkObject.ChangeOwnership(player.OwnerClientId);
             ApplyPhysicsMode();
             Debug.Log($"[World] Grab item={NetworkObjectId} holder={Holder.Value} owner={OwnerClientId} serverKinematic={body.isKinematic}");
             return true;
@@ -72,7 +75,8 @@ namespace Coop.Gameplay
 
         public void Release(PlayerAvatar player, bool throwItem)
         {
-            if (!IsServer || Holder.Value != player.OwnerClientId || player.HeldItem.Value != NetworkObjectId) return;
+            if (!IsServer || Holder.Value != player.OwnerClientId || player.HeldItem.Value != NetworkObjectId)
+                return;
             player.HeldItem.Value = Nobody;
             Holder.Value = Nobody;
             NetworkObject.RemoveOwnership();
@@ -87,7 +91,11 @@ namespace Coop.Gameplay
         {
             foreach (var item in Active)
             {
-                if (!item || !item.IsServer || item.Holder.Value != clientId) continue;
+                if (!item || !item.IsServer || item.Holder.Value != clientId)
+                    continue;
+                if (item.NetworkManager.ConnectedClients.TryGetValue(clientId, out var client)
+                    && client.PlayerObject && client.PlayerObject.TryGetComponent<PlayerAvatar>(out var player))
+                    player.HeldItem.Value = Nobody;
                 item.Holder.Value = Nobody;
                 item.NetworkObject.RemoveOwnership();
                 item.ApplyPhysicsMode();
@@ -100,11 +108,13 @@ namespace Coop.Gameplay
 
         private void FixedUpdate()
         {
-            if (!IsSpawned || !IsServer) return;
+            if (!IsSpawned || !IsServer)
+                return;
             if (Holder.Value != Nobody)
             {
                 if (!NetworkManager.ConnectedClients.TryGetValue(Holder.Value, out var client)
-                    || !client.PlayerObject || !client.PlayerObject.TryGetComponent<PlayerAvatar>(out var player))
+                    || !client.PlayerObject || !client.PlayerObject.TryGetComponent<PlayerAvatar>(out var player)
+                    || !player.HasValidWorldPose)
                 {
                     DropForPlayer(Holder.Value);
                     return;
@@ -113,7 +123,8 @@ namespace Coop.Gameplay
                 var distance = 1.6f;
                 // Prevent a carried object being pushed into level walls.
                 if (Physics.SphereCast(eye, 0.38f, player.ViewDirection, out var hit, distance,
-                        1 << 0, QueryTriggerInteraction.Ignore)) distance = Mathf.Max(0.45f, hit.distance - 0.05f);
+                        1 << 0, QueryTriggerInteraction.Ignore))
+                    distance = Mathf.Max(0.45f, hit.distance - 0.05f);
                 body.MovePosition(eye + player.ViewDirection * distance);
                 body.MoveRotation(player.transform.rotation);
             }

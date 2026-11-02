@@ -8,7 +8,10 @@ namespace Coop.Infrastructure
 {
     public sealed class LocalPlayerIdentity : IPlayerIdentity
     {
-        public string PlayerId { get; }
+        public string PlayerId
+        {
+            get;
+        }
         public string DisplayName => string.Empty;
 
         public LocalPlayerIdentity(string profile)
@@ -37,8 +40,11 @@ namespace Coop.Infrastructure
 
         public Task PrepareAsync(bool isHost, string address, ushort port, int maxPlayers)
         {
-            if (port == 0) throw new ArgumentException("Port must be between 1 and 65535.");
+            if (port == 0)
+                throw new ArgumentException("Port must be between 1 and 65535.");
             manager.NetworkConfig.NetworkTransport = transport;
+            transport.DisconnectTimeoutMS = 5000;
+            transport.HeartbeatTimeoutMS = 500;
             transport.SetConnectionData(address, port, isHost ? "0.0.0.0" : null);
             return Task.CompletedTask;
         }
@@ -46,9 +52,15 @@ namespace Coop.Infrastructure
         public ulong GetRtt(ulong clientId) => transport.GetCurrentRtt(clientId);
         // A saved GUID distinguishes profiles; it is deliberately not authentication.
         public bool ValidateIdentity(ulong clientId, string playerId) => Guid.TryParse(playerId, out _);
-        public void Tick() { }
-        public void SetSessionState(bool inGame, int players, int maxPlayers) { }
-        public void Shutdown() { }
+        public void Tick()
+        {
+        }
+        public void SetSessionState(bool inGame, int players, int maxPlayers)
+        {
+        }
+        public void Shutdown()
+        {
+        }
     }
 
     public sealed class LoggingGameStats : IGameStats
@@ -64,7 +76,8 @@ namespace Coop.Infrastructure
 
         public void Flush()
         {
-            if (pendingThrows == 0) return;
+            if (pendingThrows == 0)
+                return;
             Debug.Log($"[Stats] StoreStats stub: throws={totalThrows}, pending={pendingThrows}");
             pendingThrows = 0;
         }

@@ -14,8 +14,14 @@ namespace Coop.Infrastructure
 
     public interface IPlayerIdentity
     {
-        string PlayerId { get; }
-        string DisplayName { get; }
+        string PlayerId
+        {
+            get;
+        }
+        string DisplayName
+        {
+            get;
+        }
     }
 
     public interface IGameStats

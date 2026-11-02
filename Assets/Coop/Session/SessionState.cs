@@ -5,7 +5,10 @@ using UnityEngine;
 
 namespace Coop.Session
 {
-    public enum SessionPhase : byte { Lobby, Loading, Playing }
+    public enum SessionPhase : byte
+    {
+        Lobby, Loading, Playing
+    }
 
     public struct PlayerRecord : INetworkSerializable, IEquatable<PlayerRecord>
     {
@@ -44,7 +47,8 @@ namespace Coop.Session
         public int Find(ulong clientId)
         {
             for (int i = 0; i < Players.Count; i++)
-                if (Players[i].ClientId == clientId) return i;
+                if (Players[i].ClientId == clientId)
+                    return i;
             return -1;
         }
 

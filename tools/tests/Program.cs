@@ -57,4 +57,7 @@ barrier.MarkReady(77);
 Expect(!barrier.TryOpen(), "unknown client cannot complete another player's load");
 barrier.Reset();
 Expect(!barrier.IsLoading && !barrier.TryOpen(), "shutdown resets loading state");
+Expect(DisconnectMessages.ForUser("You were kicked by the host.", false) == "You were kicked by the host.", "kick reason survives transport shutdown");
+Expect(DisconnectMessages.ForUser("[TransportShutdown] internal details", false) == "Connection lost or host left the session.", "internal diagnostic reason is not shown as menu text");
+Expect(DisconnectMessages.ForUser("", true).Contains("timed out"), "failed initial connection has timeout reason");
 Console.WriteLine($"All {checks} session policy checks passed.");

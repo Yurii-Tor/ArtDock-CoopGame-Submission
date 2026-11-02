@@ -25,9 +25,12 @@ namespace Coop.Session
                 return "Invalid player profile.";
             if (Encoding.UTF8.GetByteCount(payload.playerId) > 60 || Encoding.UTF8.GetByteCount(payload.name) > 60)
                 return "Player profile is too long.";
-            if (payload.version != BuildVersion) return "Different build version. Use version " + BuildVersion + ".";
-            if (playerIds.Contains(payload.playerId)) return "This player is already in the session. Use a different --profile for local testing.";
-            if (reservedCount >= MaxPlayers) return "Session is full (4 players).";
+            if (payload.version != BuildVersion)
+                return "Different build version. Use version " + BuildVersion + ".";
+            if (playerIds.Contains(payload.playerId))
+                return "This player is already in the session. Use a different --profile for local testing.";
+            if (reservedCount >= MaxPlayers)
+                return "Session is full (4 players).";
             return string.Empty;
         }
     }

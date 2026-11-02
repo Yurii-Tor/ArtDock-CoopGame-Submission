@@ -8,5 +8,6 @@
   <ItemGroup>
     <Compile Include="../../Assets/Coop/Session/ApprovalPolicy.cs" Link="ApprovalPolicy.cs" />
     <Compile Include="../../Assets/Coop/Session/LoadingBarrier.cs" Link="LoadingBarrier.cs" />
+    <Compile Include="../../Assets/Coop/Session/DisconnectMessages.cs" Link="DisconnectMessages.cs" />
   </ItemGroup>
 </Project>

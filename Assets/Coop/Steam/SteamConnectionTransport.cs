@@ -48,7 +48,8 @@ namespace Coop.Steam
         public bool TryInitialize(out string error)
         {
             error = "";
-            if (initialized) return true;
+            if (initialized)
+                return true;
             try
             {
                 SteamClient.Init(AppId, false);
@@ -68,7 +69,8 @@ namespace Coop.Steam
             }
             catch (Exception exception)
             {
-                if (SteamClient.IsValid) SteamClient.Shutdown();
+                if (SteamClient.IsValid)
+                    SteamClient.Shutdown();
                 error = "Steam unavailable. Start Steam and sign in, or restart with --transport utp. " + exception.Message;
                 return false;
             }
@@ -76,7 +78,8 @@ namespace Coop.Steam
 
         public async Task PrepareAsync(bool hosting, string address, ushort port, int maxPlayers)
         {
-            if (!TryInitialize(out var error)) throw new InvalidOperationException(error);
+            if (!TryInitialize(out var error))
+                throw new InvalidOperationException(error);
             Shutdown();
             var operation = ++generation;
             isHost = hosting;
@@ -102,7 +105,8 @@ namespace Coop.Steam
                 result?.Leave();
                 throw new OperationCanceledException("Steam connection cancelled.");
             }
-            if (!result.HasValue) throw new InvalidOperationException("Steam could not join or create this lobby.");
+            if (!result.HasValue)
+                throw new InvalidOperationException("Steam could not join or create this lobby.");
             lobby = result;
             var current = result.Value;
             if (hosting)
@@ -110,7 +114,10 @@ namespace Coop.Steam
                 originalHost = SteamClient.SteamId;
                 current.SetJoinable(false);
                 current.MaxMembers = maxPlayers;
-                if (options.FriendsOnly) current.SetFriendsOnly(); else current.SetPrivate();
+                if (options.FriendsOnly)
+                    current.SetFriendsOnly();
+                else
+                    current.SetPrivate();
                 current.SetData("game", GameKey);
                 current.SetData("name", options.LobbyName);
                 current.SetData("host", PlayerId);
@@ -136,19 +143,25 @@ namespace Coop.Steam
 
         private static async void LeaveLateLobby(Task<Lobby?> pending)
         {
-            try { (await pending)?.Leave(); }
+            try
+            {
+                (await pending)?.Leave();
+            }
             catch (Exception exception) { Debug.LogWarning("Late Steam lobby request failed: " + exception.Message); }
         }
 
         public void Tick()
         {
-            if (initialized && SteamClient.IsValid) SteamClient.RunCallbacks();
+            if (initialized && SteamClient.IsValid)
+                SteamClient.RunCallbacks();
         }
 
         public bool ValidateIdentity(ulong clientId, string playerId)
         {
-            if (!ulong.TryParse(playerId, out var claimedId)) return false;
-            if (clientId == NetworkManager.ServerClientId) return claimedId == SteamClient.SteamId.Value;
+            if (!ulong.TryParse(playerId, out var claimedId))
+                return false;
+            if (clientId == NetworkManager.ServerClientId)
+                return claimedId == SteamClient.SteamId.Value;
             return transport.TryGetSteamId(manager.GetTransportIdFromClientId(clientId), out var actualId) && actualId == claimedId;
         }
 
@@ -156,9 +169,11 @@ namespace Coop.Steam
 
         public void SetSessionState(bool inGame, int players, int maxPlayers)
         {
-            if (!initialized || !lobby.HasValue) return;
+            if (!initialized || !lobby.HasValue)
+                return;
             var status = inGame ? $"In game {players}/{maxPlayers}" : $"In lobby {players}/{maxPlayers}";
-            if (status == lastPresence) return;
+            if (status == lastPresence)
+                return;
             lastPresence = status;
             SteamFriends.SetRichPresence("status", status);
             SteamFriends.SetRichPresence("connect", "+connect_lobby " + LobbyId);
@@ -175,14 +190,16 @@ namespace Coop.Steam
 
         public void OpenInviteOverlay()
         {
-            if (initialized && lobby.HasValue) SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
+            if (initialized && lobby.HasValue)
+                SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
         }
 
         private void OnInvite(Lobby invited, SteamId inviter) => InviteJoinRequested?.Invoke(invited.Id.ToString());
         private void OnPresenceJoin(Friend friend, string connect)
         {
             const string prefix = "+connect_lobby ";
-            if (connect.StartsWith(prefix, StringComparison.Ordinal)) InviteJoinRequested?.Invoke(connect.Substring(prefix.Length).Trim());
+            if (connect.StartsWith(prefix, StringComparison.Ordinal))
+                InviteJoinRequested?.Invoke(connect.Substring(prefix.Length).Trim());
         }
 
         private void OnMemberLeft(Lobby changed, Friend member)
@@ -193,13 +210,16 @@ namespace Coop.Steam
 
         private void OnLobbyChanged(Lobby changed)
         {
-            if (isHost || !lobby.HasValue || changed.Id != lobby.Value.Id) return;
-            if (changed.GetData("closed") == "1" || changed.Owner.Id.Value != originalHost) OnHostLost();
+            if (isHost || !lobby.HasValue || changed.Id != lobby.Value.Id)
+                return;
+            if (changed.GetData("closed") == "1" || changed.Owner.Id.Value != originalHost)
+                OnHostLost();
         }
 
         private void OnHostLost()
         {
-            if (!lobby.HasValue || isHost) return;
+            if (!lobby.HasValue || isHost)
+                return;
             Shutdown();
             SessionEnded?.Invoke("The Steam lobby host left. Host migration is not supported.");
         }
@@ -221,13 +241,15 @@ namespace Coop.Steam
             lobby = null;
             originalHost = 0;
             lastPresence = null;
-            if (initialized) SteamFriends.ClearRichPresence();
+            if (initialized)
+                SteamFriends.ClearRichPresence();
         }
 
         public void Dispose()
         {
             Shutdown();
-            if (!initialized) return;
+            if (!initialized)
+                return;
             SteamFriends.OnGameLobbyJoinRequested -= OnInvite;
             SteamFriends.OnGameRichPresenceJoinRequested -= OnPresenceJoin;
             SteamMatchmaking.OnLobbyDataChanged -= OnLobbyChanged;
