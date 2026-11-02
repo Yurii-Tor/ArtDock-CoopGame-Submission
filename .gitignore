@@ -8,9 +8,13 @@ Artifacts/
 tmp/
 .vs/
 *.csproj
+!tools/tests/*.csproj
+**/bin/
+**/obj/
 *.sln
 *.slnx
 *.user
 *.log
 *.zip
 .DS_Store
+Assets/Resources/PerformanceTestRun*
