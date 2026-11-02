@@ -138,7 +138,7 @@ namespace Coop.App
                 foreach (var p in session.State.Players)
                     sb.AppendLine($"{p.Name}  ·  {p.Rtt} ms  ·  {(p.Ready ? "ready" : "loading / lobby")}");
             roster.text = sb.ToString();
-            scoreboard.text = playing ? "SESSION / " + session.State.Players.Count + " of 4\n" + sb : "";
+            scoreboard.text = playing ? "SESSION / " + session.State.Players.Count + " of " + session.State.PlayerLimit.Value + "\n" + sb : "";
             hud.text = playing ? "WASD move · Mouse look · Space jump · F spawn · E grab/drop · Right click throw · X delete · C colour\nTab / Esc: players & cursor    " + root.Notice : "Host a session or join a host. The host starts the level once everyone is in the lobby.";
             foreach (Transform child in kickRows)
                 Destroy(child.gameObject);

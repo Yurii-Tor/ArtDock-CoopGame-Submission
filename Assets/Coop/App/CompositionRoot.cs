@@ -63,6 +63,7 @@ namespace Coop.App
             }
             stats = new LoggingGameStats();
             Session.Initialize(Network, SessionPrefab, Transport, identity, stats);
+            Session.MaxPlayers = Options.Number("max-players", 4);
             Session.RequestedBuildVersion = Options.Get("build-version", ApprovalPolicy.BuildVersion);
             gameplay = new GameplayServices(ItemPrefab, id => Session.CanPlay(id), message => { Notice = message; Debug.Log(message); },
                 id => { if (id == Network.LocalClientId) stats.RecordThrow(); });

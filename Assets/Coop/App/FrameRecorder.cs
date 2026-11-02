@@ -32,7 +32,9 @@ namespace Coop.App
                     captureCamera.enabled = false;
                     captureCamera.transform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
                     captureCamera.targetTexture = target;
-                    captureCamera.cullingMask = ~0;
+                    foreach (var element in canvas.GetComponentsInChildren<Transform>(true))
+                        element.gameObject.layer = 5;
+                    captureCamera.cullingMask = source.cullingMask | (1 << 5);
                     canvas.renderMode = RenderMode.ScreenSpaceCamera;
                     canvas.worldCamera = captureCamera;
                     canvas.planeDistance = .5f;

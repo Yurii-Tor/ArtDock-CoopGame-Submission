@@ -44,6 +44,9 @@ try {
         Stop-Process -Id $holder.Id -Force
         Wait-Marker 'Host' 'Disconnect drop' 25
         if(!$KeepImpaired){Wait-Marker 'Impaired' 'SMOKE_PASS'}
+        $fresh=Start-Player 'Fresh' @('--join','--port','17880','--stay-seconds','6')
+        Wait-Marker 'Fresh' 'SMOKE_THROWN'
+        Wait-Marker 'Fresh' 'SMOKE_PASS'
     }
     Wait-Marker 'Host' 'SMOKE_PASS' 60
     Wait-Marker 'Late' 'SMOKE_HOST_LOSS_PASS' 30

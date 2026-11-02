@@ -53,6 +53,22 @@ namespace Coop.App
                 yield break;
             }
             Debug.Log("HOST_LOCAL_LEAVE_PASS");
+            yield return Await(() => !root.Network.IsListening && !root.Network.ShutdownInProgress, "host shutdown completes before rehost");
+            if (failed)
+                yield break;
+            root.Session.Host(root.Options.Get("address", "127.0.0.1"),
+                (ushort)root.Options.Number("port", 7777), root.Options.Get("name", "Lifecycle host"));
+            yield return Await(() => root.Network.IsHost && root.Session.State && root.Session.State.IsSpawned &&
+                root.Session.State.Players.Count == 1, "fresh host session in the same process");
+            if (failed)
+                yield break;
+            root.Session.StartGame();
+            yield return Await(() => root.Session.LocalCanPlay, "rehost loads a fresh playable arena");
+            if (failed)
+                yield break;
+            Debug.Log("REHOST_PASS");
+            root.Session.Leave();
+            yield return new WaitForSecondsRealtime(1);
             Application.Quit();
         }
 

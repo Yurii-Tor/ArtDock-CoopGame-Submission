@@ -27,6 +27,12 @@ namespace Coop.Session
         }
         public bool LocalCanPlay => Network && CanPlay(Network.LocalClientId);
         public string RequestedBuildVersion { get; set; } = ApprovalPolicy.BuildVersion;
+        private int maxPlayers = ApprovalPolicy.MaxPlayers;
+        public int MaxPlayers
+        {
+            get => maxPlayers;
+            set => maxPlayers = Math.Max(2, Math.Min(ApprovalPolicy.MaxPlayers, value));
+        }
         public event Action Changed;
         public event Action<ulong> PlayerDisconnected;
 
@@ -82,7 +88,7 @@ namespace Coop.Session
             SetStatus(host ? "Starting host..." : "Connecting...");
             try
             {
-                await transport.PrepareAsync(host, address, port, ApprovalPolicy.MaxPlayers);
+                await transport.PrepareAsync(host, address, port, MaxPlayers);
                 if (attempt != operation)
                     return;
                 string displayName = string.IsNullOrWhiteSpace(identity.DisplayName) ? playerName : identity.DisplayName;
@@ -94,7 +100,7 @@ namespace Coop.Session
                 // NGO always accepts its own host, so validate before asking it to start.
                 if (host)
                 {
-                    string error = ApprovalPolicy.RejectReason(payload, 0, new HashSet<string>());
+                    string error = ApprovalPolicy.RejectReason(payload, 0, new HashSet<string>(), MaxPlayers);
                     if (error.Length > 0)
                         throw new InvalidOperationException(error);
                 }
@@ -126,7 +132,7 @@ namespace Coop.Session
             var ids = new HashSet<string>();
             foreach (JoinPayload reserved in reservations.Values)
                 ids.Add(reserved.playerId);
-            string reason = ApprovalPolicy.RejectReason(payload, reservations.Count, ids);
+            string reason = ApprovalPolicy.RejectReason(payload, reservations.Count, ids, MaxPlayers);
             if (reason.Length == 0 && !transport.ValidateIdentity(request.ClientNetworkId, payload.playerId))
                 reason = "Invalid player identity.";
             response.Approved = reason.Length == 0;
@@ -143,6 +149,7 @@ namespace Coop.Session
         {
             AttachSceneEvents();
             var state = Instantiate(statePrefab);
+            state.PlayerLimit.Value = MaxPlayers;
             state.NetworkObject.Spawn(false);
             // The host connection callback can run before OnServerStarted.
             foreach (ulong clientId in Network.ConnectedClientsIds)
@@ -396,7 +403,7 @@ namespace Coop.Session
             Debug.Log("[Session] " + message);
             Changed?.Invoke();
         }
-        private void UpdatePresence() => transport?.SetSessionState(State && State.Phase.Value == SessionPhase.Playing, State ? State.Players.Count : 0, ApprovalPolicy.MaxPlayers);
+        private void UpdatePresence() => transport?.SetSessionState(State && State.Phase.Value == SessionPhase.Playing, State ? State.Players.Count : 0, State ? State.PlayerLimit.Value : MaxPlayers);
 
         private void OnApplicationQuit() => stats?.Flush();
 

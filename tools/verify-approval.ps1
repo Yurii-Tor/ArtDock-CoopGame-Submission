@@ -1,6 +1,7 @@
 param(
     [string]$Build = (Join-Path $PSScriptRoot '../Builds/Windows/DockCoop.exe'),
-    [int]$Port = 17877
+    [int]$Port = 17877,
+    [int]$MaxPlayers = 4
 )
 $ErrorActionPreference = 'Stop'
 $Build = (Resolve-Path -LiteralPath $Build).Path
@@ -36,11 +37,11 @@ function Assert-Rejected([string]$Label, [string[]]$Extra, [string]$Reason) {
 }
 
 try {
-    $hostClient = Start-Client 'host' @('--host', '--profile', "$runId-host")
+    $hostClient = Start-Client 'host' @('--host', '--profile', "$runId-host", '--max-players', "$MaxPlayers")
     Wait-Log $hostClient '[Session] Connected.'
     Assert-Rejected 'duplicate' @('--profile', "$runId-host") 'already'
     Assert-Rejected 'version' @('--profile', "$runId-version", '--build-version', 'incompatible') 'Different'
-    for ($i = 1; $i -le 3; $i++) {
+    for ($i = 1; $i -lt $MaxPlayers; $i++) {
         $client = Start-Client "player$i" @('--join', '--profile', "$runId-player$i")
         Wait-Log $client '[Session] Connected.'
     }

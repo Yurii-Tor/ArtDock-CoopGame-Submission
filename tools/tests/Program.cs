@@ -60,4 +60,9 @@ Expect(!barrier.IsLoading && !barrier.TryOpen(), "shutdown resets loading state"
 Expect(DisconnectMessages.ForUser("You were kicked by the host.", false) == "You were kicked by the host.", "kick reason survives transport shutdown");
 Expect(DisconnectMessages.ForUser("[TransportShutdown] internal details", false) == "Connection lost or host left the session.", "internal diagnostic reason is not shown as menu text");
 Expect(DisconnectMessages.ForUser("", true).Contains("timed out"), "failed initial connection has timeout reason");
+Expect(ApprovalPolicy.RejectReason(Profile("second"), 1, new HashSet<string> { "host" }, 2) == "", "two-player session accepts its second reservation");
+Expect(ApprovalPolicy.RejectReason(Profile("third"), 2, new HashSet<string> { "host", "second" }, 2) == "Session is full (2 players).", "configured two-player limit rejects a third player with the correct reason");
+Expect(ApprovalPolicy.RejectReason(Profile(), 0, new HashSet<string>(), 1).Contains("Invalid session capacity"), "capacity below two is invalid");
+Expect(ApprovalPolicy.RejectReason(Profile(), 0, new HashSet<string>(), 5).Contains("Invalid session capacity"), "capacity above four is invalid");
+Expect(ApprovalPolicy.RejectReason(Profile(), -1, new HashSet<string>(), 2).Contains("Invalid session player count"), "negative reservation count is invalid");
 Console.WriteLine($"All {checks} session policy checks passed.");

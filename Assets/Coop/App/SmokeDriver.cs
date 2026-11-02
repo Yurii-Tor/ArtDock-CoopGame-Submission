@@ -137,6 +137,12 @@ namespace Coop.App
                 yield break;
             }
             Debug.Log("SMOKE_THROWN item=" + nearest.NetworkObjectId + " owner=" + nearest.OwnerClientId);
+            if (root.Options.Has("capture"))
+            {
+                avatar.transform.rotation = Quaternion.Euler(0, root.Network.IsHost ? 90 : -90, 0);
+                avatar.RequestColor();
+                StartCoroutine(DemoWalk(avatar));
+            }
             float end = Time.realtimeSinceStartup + root.Options.Number("stay-seconds", 12);
             while (Time.realtimeSinceStartup < end)
             {
@@ -165,6 +171,18 @@ namespace Coop.App
             root.Session.Leave();
             yield return new WaitForSecondsRealtime(1);
             Application.Quit();
+        }
+
+        IEnumerator DemoWalk(PlayerAvatar avatar)
+        {
+            // Exercise the same owner-authoritative CharacterController used by keyboard movement.
+            float end = Time.realtimeSinceStartup + 2;
+            var controller = avatar.GetComponent<CharacterController>();
+            while (avatar && avatar.IsSpawned && Time.realtimeSinceStartup < end)
+            {
+                controller.Move((Vector3.forward * .5f + Vector3.down * 2) * Time.deltaTime);
+                yield return null;
+            }
         }
     }
 }

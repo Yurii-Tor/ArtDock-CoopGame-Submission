@@ -1,0 +1,22 @@
+DOCK CO-OP - Windows review build
+
+Extract the whole archive. Keep the executable, data directory and DLLs together.
+
+Local test on one PC:
+1. Run Host-Local.cmd.
+2. Run Client-1-Local.cmd (and optionally Client-2-Local.cmd).
+3. On the host click Start game.
+4. To test late join, start the second client after the game starts.
+
+WASD move; mouse look; Space jump; F spawn; E grab/drop;
+right mouse throw; X delete held item; C colour; Tab/Escape menu and player list.
+
+Two PCs: run DockCoop.exe directly and enter the host's LAN IP and UDP port7777.
+Allow the game through Windows Firewall. Internet IP mode requires port forwarding.
+
+Steam: start Steam, sign in, run Steam.cmd. Host creates a lobby, displays its ID,
+and can open the invitation overlay. A second PC must use a different Steam account.
+AppID480 is for testing. Steam integration has not been verified with two accounts.
+
+Source, technical README and verification details:
+https://github.com/Yurii-Tor/ArtDock-CoopGame

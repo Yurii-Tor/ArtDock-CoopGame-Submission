@@ -6,7 +6,7 @@ Steam is optional. The default Unity Transport path supports multiple copies on 
 
 1. Start Steam and sign in on both PCs. Add the accounts as friends for the friends-only lobby test.
 2. Extract the entire build folder on both PCs. Keep `steam_appid.txt` containing `480` next to the executable, and keep the build's native plugin files. This test uses Valve's Spacewar AppID as requested by the assignment; it does not require a production Steam app.
-3. Launch the executable with `--transport steam`. Choose Host. The default lobby is friends-only, named Dock Co-op, and limited to four members. Use `--lobby-name "Dock demo"` to change the name or `--private` for an invitation-only lobby.
+3. Launch the executable with `--transport steam`. Choose Host. The default lobby is friends-only, named Dock Co-op, and limited to four members. Use `--lobby-name "Dock demo"` to change the name, `--max-players 2` (2–4 supported) to set capacity, or `--private` for an invitation-only lobby.
 4. Copy the lobby ID shown in the menu. On the second PC enter that ID in the address/lobby field and choose Join. IP addresses and port forwarding are not used in Steam mode.
 5. Alternatively choose **Invite Steam friends** on the host, or use Steam's Join Game action. The adapter handles lobby and rich-presence join callbacks; startup `+connect_lobby <id>` is also accepted. Leave the current session before accepting another session's invitation.
 6. Start the game on the host. Repeat late join, grab/throw, client exit, host exit, and host process termination. Repeat with a private lobby and an invited friend.

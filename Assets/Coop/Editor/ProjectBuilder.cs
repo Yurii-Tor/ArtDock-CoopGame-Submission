@@ -113,6 +113,8 @@ namespace Coop.Editor
             Directory.CreateDirectory("Builds/Windows");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { Generated + "/Menu.unity", Generated + "/Arena.unity" }, locationPathName = "Builds/Windows/DockCoop.exe", target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development });
             File.WriteAllText("Builds/Windows/steam_appid.txt", "480\n");
+            foreach (var launcher in Directory.GetFiles("tools/launchers"))
+                File.Copy(launcher, Path.Combine("Builds/Windows", Path.GetFileName(launcher)), true);
             if (report.summary.result != BuildResult.Succeeded)
                 throw new System.Exception("Build failed: " + report.summary.result);
             Debug.Log("COOP_BUILD_OK " + report.summary.totalSize);

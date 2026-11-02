@@ -37,6 +37,7 @@ namespace Coop.Session
         public readonly NetworkList<PlayerRecord> Players = new NetworkList<PlayerRecord>();
         public readonly NetworkVariable<SessionPhase> Phase = new NetworkVariable<SessionPhase>(SessionPhase.Lobby);
         public readonly NetworkVariable<double> PlayAt = new NetworkVariable<double>();
+        public readonly NetworkVariable<int> PlayerLimit = new NetworkVariable<int>(ApprovalPolicy.MaxPlayers);
 
         public override void OnNetworkSpawn()
         {
