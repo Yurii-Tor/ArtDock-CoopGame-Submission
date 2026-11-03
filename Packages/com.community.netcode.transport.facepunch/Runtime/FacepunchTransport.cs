@@ -1,4 +1,5 @@
 // Adapted from Unity's MIT-licensed community Facepunch transport. See LICENSE.md and UPSTREAM.md.
+#if UNITY_EDITOR_WIN || (UNITY_STANDALONE_WIN && !UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -212,3 +213,4 @@ namespace Netcode.Transports.Facepunch
             Receive(connection.Id, data, size);
     }
 }
+#endif

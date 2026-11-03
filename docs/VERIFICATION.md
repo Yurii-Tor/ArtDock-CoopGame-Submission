@@ -41,3 +41,20 @@ Run the build with `--race` on one host and one client for the contested-item pr
 - Bandwidth profiling and subjective movement smoothness under varied network conditions. The configured rates/thresholds are documented, not presented as measured bandwidth.
 
 Approximate AI-assisted implementation, debugging and automated verification time: 1.5 hours. The pending manual/two-PC/Steam checks are additional and not included.
+
+## macOS build follow-up — 3 November 2026
+
+The original time estimate above covers the initial Windows implementation. The following platform and packaging work is additional.
+
+| Check | Result / evidence |
+|---|---|
+| macOS Universal development build from Windows | PASS; `Artifacts/build-macos.log`, `COOP_MAC_BUILD_OK 316897441`; no C# errors or warnings |
+| Native CPU slices | All six Mach-O binaries contain x86_64 and arm64; `Info.plist` minimum macOS version is 12.0 |
+| ZIP and launch scripts | CRC PASS; native executables and `.command` launchers use Unix mode 0755; launchers use LF and pass `bash -n`; Windows Steam binaries and DoNotShip directories excluded |
+| Windows rebuild after platform guards | PASS; `Artifacts/build.log`, `COOP_BUILD_OK 158439576`; no C# errors or warnings |
+| Session policy checks | All 32 PASS again |
+| Windows multiplayer regression | PASS; `Artifacts/gameplay-20261103-185210/`, `GAMEPLAY_SUITE_PASS`; impaired client, held-state late join, killed holder, fresh connection and host-loss handling |
+
+The macOS application has not been executed on a Mac. Cross-platform sessions, physical input, Finder launch, Gatekeeper acceptance and Steam remain manual checks; compilation and structural archive inspection do not establish those results. The macOS build uses UTP only. The development app has no Developer ID notarization. Follow [MANUAL-TESTING.md](MANUAL-TESTING.md) and the archive's `START-HERE-macOS.txt` for the next run.
+
+The follow-up pair is packaged locally as `Artifacts/DockCoop-macOS.zip` and `Artifacts/DockCoop-Windows-CrossPlatform.zip`, with the source revision in each `BUILD-INFO.txt` and checksums in `Artifacts/CROSS-PLATFORM-SHA256SUMS.txt`. The Windows v0.1.0 release remains a separate recorded build.

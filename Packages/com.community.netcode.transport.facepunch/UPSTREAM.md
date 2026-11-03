@@ -13,6 +13,7 @@ Local transport changes:
 - Authenticated peer SteamIDs are exposed for approval and P2P connections require lobby membership.
 - A one-byte frame tag distinguishes NGO payload from a 9-byte once-per-second ping/pong. RTT is measured on the host, not reported by clients. This framing requires both peers to use this fork.
 - Windows x64 only; removed unavailable NetcodeInterop assembly reference and unsafe memory copies.
+- Compile guards exclude the Windows-only Steam bindings in other editors and players; those platforms can use the game's separate UTP adapter.
 - Native callback gates are scoped to one network session, preventing a late disconnect from an old connection from terminating a new one. Explicit disconnects linger to flush reliable refusal/kick reasons.
 
 The relay socket APIs are Steam Networking Sockets (CreateRelaySocket / ConnectRelay), not the legacy SteamNetworking P2P API. Steam selects direct connectivity or SDR as appropriate.

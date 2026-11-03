@@ -19,4 +19,4 @@ and can open the invitation overlay. A second PC must use a different Steam acco
 AppID480 is for testing. Steam integration has not been verified with two accounts.
 
 Source, technical README and verification details:
-https://github.com/Yurii-Tor/ArtDock-CoopGame
+https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission

@@ -1,6 +1,6 @@
 # Steam transport
 
-Steam is optional. The default Unity Transport path supports multiple copies on one PC without Steam. Steam mode needs two PCs, two different signed-in Steam accounts, internet access, and the same Windows x64 build on both PCs. A single Steam account cannot represent two simultaneous players in this test.
+Steam is optional and currently bundled for Windows x64 only. The default Unity Transport path supports Windows/macOS peers and multiple copies on one PC without Steam. Steam mode needs two different signed-in Steam accounts in separate running Steam environments, internet access and matching Windows builds. Two physical Windows PCs are the recommended setup. A separate Windows VM with its own Steam installation is an unverified alternative; two game windows in one ordinary Steam session do not create two Steam identities. See [environment choices](MANUAL-TESTING.md#two-steam-accounts).
 
 ## Launch and join
 
@@ -31,7 +31,7 @@ The shared `IGameStats` implementation is deliberately a logging stub, allowed b
 
 ## Verification boundary
 
-The sources compile against the project's actual Unity, NGO and Facepunch assemblies. This does **not** prove live P2P, SDR routing, overlay injection, invitations or lobby behavior. Those require the two-account/two-PC checklist above. Do not present unexecuted Steam scenarios as passed. The baseline automated multi-client tests use UTP.
+The Windows sources compile against the project's actual Unity, NGO and Facepunch assemblies. This does **not** prove live P2P, SDR routing, overlay injection, invitations or lobby behavior. Those require the two-account checklist above. A connected Steam session does not by itself prove that Steam selected a relay instead of a direct route. Do not present unexecuted Steam scenarios as passed. The baseline automated multi-client tests use UTP; the macOS build uses UTP and reports an explanatory error if Steam is selected.
 
 Sources: [pinned Unity community transport](https://github.com/Unity-Technologies/multiplayer-community-contributions/tree/0fab638470379ace12b0149dfb41c043d23dbce5/Transports/com.community.netcode.transport.facepunch), [Facepunch initialization](https://wiki.facepunch.com/steamworks/SteamClient.Init), [lobby creation](https://wiki.facepunch.com/steamworks/SteamMatchmaking.CreateLobbyAsync), [lobby join requests](https://wiki.facepunch.com/steamworks/SteamFriends.OnGameLobbyJoinRequested), [Valve matchmaking and lobbies](https://partner.steamgames.com/doc/features/multiplayer/matchmaking), [Valve rich presence](https://partner.steamgames.com/doc/features/enhancedrichpresence).
 

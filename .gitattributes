@@ -7,3 +7,4 @@
 *.meta text eol=lf
 *.dll binary
 *.png binary
+*.command text eol=lf

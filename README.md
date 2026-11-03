@@ -8,6 +8,8 @@ Open with **Unity 6000.3.21f1 LTS**, open `Assets/Coop/Generated/Menu.unity`, an
 
 Windows build: extract the whole archive, keep the data and DLL folders alongside the executable. Host starts a lobby, clients join, then the host clicks **Start game**. A late joiner joins the same address while the session is playing.
 
+The macOS Universal build supports macOS 12 or newer on Intel and Apple Silicon and connects to Windows using UTP/IP. Extract the whole archive, open `DockCoop.app`, or use `Host-LAN.command` / `Join-LAN.command`. The macOS build does not include the Windows Steam adapter and has not yet been run on a physical Mac. See the [manual testing procedure](docs/MANUAL-TESTING.md) for LAN, VM and Internet setups.
+
 ```powershell
 .\DockCoop.exe --host --profile host --name Alice --port 7777
 .\DockCoop.exe --join --profile client1 --name Bob --address 127.0.0.1 --port 7777
@@ -72,10 +74,12 @@ python tools/udp_proxy.py --listen 7778 --target 7777 --delay-ms 75 --jitter-ms 
 
 Use a separate proxy port/process for each impaired client. Base added RTT is 150 ms, with jitter and 3% loss in each direction. Unity's deprecated `SetDebugSimulatorParameters` is intentionally not used: it has no effect in this package version. The `--smoke` harness drives normal public gameplay requests for build tests; see [verification evidence](docs/VERIFICATION.md) for executed cases and pending manual checks.
 
-Known scope: one arena/item, no persistence across host restarts, no host migration, no competitive anti-cheat or client prediction, no bandwidth measurements yet. Steam code compiles but two separate Steam accounts/PCs are required to validate its live relay, overlay and lobby flows. Exact simultaneous screen changes cannot be guaranteed under arbitrary latency; all initial clients target the same synchronized server timestamp with a 750 ms lead.
+Known scope: one arena/item, no persistence across host restarts, no host migration, no competitive anti-cheat or client prediction, no bandwidth measurements yet. Steam code compiles for Windows but its live connectivity, overlay and lobby flows require validation with two separate Steam accounts and running Steam environments. Two physical Windows PCs are recommended; a Windows VM is an unverified alternative. Exact simultaneous screen changes cannot be guaranteed under arbitrary latency; all initial clients target the same synchronized server timestamp with a 750 ms lead.
 
 ## Delivery
 
 Repository history contains implementation and verification commits. Windows archive and demonstration video are local deliverables listed in the verification report. Work was AI-assisted; elapsed implementation/verification time is recorded there; pending manual testing is additional.
+
+To reproduce the macOS build from Windows, install **Mac Build Support (Mono)** for the pinned Unity editor, run `powershell -ExecutionPolicy Bypass -File tools/build-macos.ps1`, then `python tools/package-macos.py`. The packaging script preserves Unix executable permissions in `Artifacts/DockCoop-macOS.zip`. This is a development build without Developer ID notarization.
 
 Third-party code is limited to Unity networking/input/UI packages and the allowed [community Facepunch transport](https://github.com/Unity-Technologies/multiplayer-community-contributions/tree/main/Transports/com.community.netcode.transport.facepunch). Its pinned source, local patches and licenses are in [UPSTREAM.md](Packages/com.community.netcode.transport.facepunch/UPSTREAM.md). No multiplayer sample/template is used as the project foundation.

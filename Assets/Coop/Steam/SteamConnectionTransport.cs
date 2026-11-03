@@ -1,3 +1,4 @@
+#if UNITY_EDITOR_WIN || (UNITY_STANDALONE_WIN && !UNITY_EDITOR)
 using System;
 using System.Globalization;
 using System.Linq;
@@ -260,3 +261,48 @@ namespace Coop.Steam
         }
     }
 }
+#else
+using System;
+using System.Threading.Tasks;
+using Coop.Infrastructure;
+using Unity.Netcode;
+using UnityEngine;
+
+namespace Coop.Steam
+{
+    public sealed class SteamSessionOptions
+    {
+        public string LobbyName = "Coop Workshop";
+        public bool FriendsOnly = true;
+    }
+
+    /// <summary>The optional native Steam adapter is distributed for Windows only.</summary>
+    public sealed class SteamConnectionTransport : IConnectionTransport, IPlayerIdentity, IDisposable
+    {
+        const string Unavailable = "Steam transport is available in the Windows build only. Restart without --transport steam to use IP/port (UTP).";
+
+        public SteamConnectionTransport(NetworkManager manager, SteamSessionOptions options) { }
+        public event Action<string> InviteJoinRequested { add { } remove { } }
+        public event Action<string> SessionEnded { add { } remove { } }
+        public string LobbyId => "";
+        public string PlayerId => "";
+        public string DisplayName => "";
+
+        public bool TryInitialize(out string error)
+        {
+            error = Unavailable;
+            return false;
+        }
+
+        public Task PrepareAsync(bool isHost, string address, ushort port, int maxPlayers) =>
+            Task.FromException(new PlatformNotSupportedException(Unavailable));
+        public bool ValidateIdentity(ulong clientId, string playerId) => false;
+        public ulong GetRtt(ulong clientId) => 0;
+        public void OpenInviteOverlay() => Debug.LogWarning(Unavailable);
+        public void Tick() { }
+        public void SetSessionState(bool inGame, int players, int maxPlayers) { }
+        public void Shutdown() { }
+        public void Dispose() { }
+    }
+}
+#endif
