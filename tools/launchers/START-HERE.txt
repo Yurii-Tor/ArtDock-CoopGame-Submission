@@ -19,7 +19,8 @@ Host creates a friends-only lobby and displays its ID. Add the accounts as frien
 enter that lobby ID on the other computer and choose Join. No IP or VPN is needed.
 A second computer must use a different Steam account and the matching game build.
 The host can also open the invitation overlay where Steam overlay is available.
-AppID480 is for testing. Steam integration has not been verified with two accounts.
+AppID480 is for testing. Two-account Windows/Mac lobby-ID join and gameplay were
+manually verified on 3 November 2026; see docs/VERIFICATION.md for scope and gaps.
 
 Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 

@@ -24,8 +24,8 @@ Tab/Escape show session controls and release the cursor.
 Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 The game continues networking while unfocused.
 
-This development build is not Developer-ID-notarized and has not been run on
-a physical Mac. After checking the trusted source and SHA256 checksum, if
+This development build was manually tested with a Windows Steam host and a
+macOS Ventura 13.2.1 client. It is not Developer-ID-notarized. If
 macOS blocks opening it, use System Settings > Privacy & Security > Open Anyway.
 Do not disable Gatekeeper globally. Report the exact error if it still fails.
 

@@ -8,7 +8,7 @@ Open with **Unity 6000.3.21f1 LTS**, open `Assets/Coop/Generated/Menu.unity`, an
 
 Windows build: extract the whole archive, keep the data and DLL folders alongside the executable. Host starts a lobby, clients join, then the host clicks **Start game**. A late joiner joins the same address while the session is playing.
 
-The macOS Universal build supports macOS 12 or newer on Intel and Apple Silicon, with both Steam and UTP/IP transports. For Internet play, start Steam under different accounts on the two computers, add them as friends, then run `Steam.cmd` on Windows and `Steam.command` on Mac. Host creates a lobby; the other player enters its displayed lobby ID and joins. A VPN or shared local network is not required in Steam mode. Live Windows-to-Mac Steam play remains a manual verification step. See [Steam setup](docs/STEAM.md).
+The macOS Universal build supports macOS 12 or newer on Intel and Apple Silicon, with both Steam and UTP/IP transports. For Internet play, start Steam under different accounts on the two computers, add them as friends, then run `Steam.cmd` on Windows and `Steam.command` on Mac. Host creates a lobby; the other player enters its displayed lobby ID and joins. A VPN or shared local network is not required in Steam mode. A two-account Windows-to-Mac Steam session across different networks was manually verified on 3 November 2026, including scene entry and gameplay controls. See [Steam setup](docs/STEAM.md) and the [verification scope](docs/VERIFICATION.md#manual-steam-session--3-november-2026).
 
 For local/IP testing, open `DockCoop.app` directly or use `Host-LAN.command` / `Join-LAN.command`. Rendering is capped at 60 FPS while focused and 30 FPS in the background; networking continues while unfocused. See the [manual testing procedure](docs/MANUAL-TESTING.md).
 
@@ -18,7 +18,7 @@ For local/IP testing, open `DockCoop.app` directly or use `Host-LAN.command` / `
 .\DockCoop.exe --join --profile client2 --name Carol --address 127.0.0.1 --port 7777
 ```
 
-Without `--host` / `--join`, use the menu. Each `--profile` has a separate persistent local GUID; the same profile deliberately fails duplicate-player approval. On two PCs use the host's LAN IPv4 address and allow the executable/UDP port through Windows Firewall. Across the public Internet direct UDP requires host port forwarding and a reachable address; Steam mode provides relay connectivity without that setup. No claim of a public two-PC test is made in the local verification report.
+Without `--host` / `--join`, use the menu. Each `--profile` has a separate persistent local GUID; the same profile deliberately fails duplicate-player approval. In UTP mode on two PCs, use the host's LAN IPv4 address and allow the executable/UDP port through Windows Firewall. Across the public Internet direct UDP requires host port forwarding and a reachable address; Steam mode handles connectivity without that setup. The verification report distinguishes local UTP tests from the manual Internet Steam session.
 
 Steam: start with `--transport steam`, host a friends-only lobby, share its displayed ID or use **Invite Steam friends**. `--private` creates a private lobby; `--lobby-name "Test room"` names it. See [Steam setup and verification limits](docs/STEAM.md). The default UTP mode works without Steam or a second Steam account.
 
