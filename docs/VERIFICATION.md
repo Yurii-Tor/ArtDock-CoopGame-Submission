@@ -101,3 +101,14 @@ Executable source revision: `bb3f937c09246a409de4947755978fb6865ba0e8` (Steam r2
 | Held-item access check | Host log shows attempts to grab an item already held by client1 being rejected; this does not establish a simultaneous free-item race test |
 
 Local evidence: `Artifacts/steam-manual-host-r2.log`. The record combines the tester's report with host-side logs; the assistant did not independently inspect both screens. It establishes actual cross-platform Steam gameplay, rejoin and graceful session-exit behavior. The direct/SDR route, overlay/invitation/private-lobby flows, simultaneous free-item race and forced process termination over Steam were not established by this manual session. Earlier automated UTP crash tests remain separate evidence.
+
+## Steam invitation feedback — 4 November 2026
+
+The invitation button now checks Steam and overlay availability and displays feedback in the session panel. Invite and Copy lobby ID are disabled before a connection is established. Copying a lobby ID works independently of the overlay; feedback resets on lobby changes. A dialog request is not reported as a sent invitation.
+
+- Windows and Universal macOS builds passed with no C# errors or warnings: `COOP_BUILD_OK 158540291`, `COOP_MAC_BUILD_OK 317942720`.
+- Source review covered both platform branches, UI refresh, lobby-change reset and panel layout. This is not a runtime visual check.
+- The updated packages use the `Steam-r3` suffix. Earlier two-computer gameplay evidence above refers to r2. This update does not change the wire protocol or gameplay.
+- Opening the Steam invitation dialog and accepting an invitation remain manually unverified. The reported absence of a dialog does not establish its exact cause; the new availability check distinguishes an unavailable overlay from a dialog request.
+
+To verify the UI, launch in Steam mode, confirm both buttons are disabled before Host/Join, then create a lobby. Copy its ID and paste it into a text field; it must match the displayed numeric ID. Click Invite: an unavailable overlay must produce a readable message that survives subsequent UI refreshes. With the overlay available, confirm the invitation dialog opens and a friend can accept it. Leave and create a new lobby to confirm the prior feedback clears. See [STEAM.md](STEAM.md#invitation-button-and-overlay-availability) for overlay launch requirements.

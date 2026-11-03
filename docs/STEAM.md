@@ -7,11 +7,19 @@ Steam is optional and bundled for Windows x64 and macOS Universal (Intel and App
 1. Start Steam and sign in on both PCs. Add the accounts as friends for the friends-only lobby test.
 2. Extract the entire build folder on both PCs. Keep `steam_appid.txt` containing `480` next to the executable, and keep the build's native plugin files. This test uses Valve's Spacewar AppID as requested by the assignment; it does not require a production Steam app.
 3. Run `Steam.cmd` on Windows or `Steam.command` on Mac; both select `--transport steam`. Choose Host. The default lobby is friends-only, named Dock Co-op, and limited to four members. Use `--lobby-name "Dock demo"` to change the name, `--max-players 2` (2–4 supported) to set capacity, or `--private` for an invitation-only lobby.
-4. Copy the lobby ID shown in the menu. On the second PC enter that ID in the address/lobby field and choose Join. IP addresses and port forwarding are not used in Steam mode.
-5. Alternatively choose **Invite Steam friends** on the host, or use Steam's Join Game action. The adapter handles lobby and rich-presence join callbacks; startup `+connect_lobby <id>` is also accepted. Leave the current session before accepting another session's invitation.
+4. Choose **Copy lobby ID** in the menu. On the second PC paste that ID in the address/lobby field and choose Join. IP addresses and port forwarding are not used in Steam mode.
+5. Alternatively choose **Invite Steam friends** after joining or hosting a lobby, where Steam Overlay is available, or use Steam's Join Game action. The adapter handles lobby and rich-presence join callbacks; startup `+connect_lobby <id>` is also accepted. Leave the current session before accepting another session's invitation.
 6. Start the game on the host. Repeat late join, grab/throw, client exit, host exit, and host process termination. Repeat with a private lobby and an invited friend.
 
 If Steam initialization fails, the game presents a readable message. Start and sign in to Steam, then retry, or relaunch with `--transport utp`. No application restart through Steam is forced during development.
+
+### Invitation button and overlay availability
+
+**Invite Steam friends** opens Steam's invitation dialog for the current lobby; it does not send invitations automatically. Both invitation buttons are disabled until connected to a lobby. If Steam reports that its overlay is unavailable, a persistent message explains the lobby-ID alternative. **Copy lobby ID** copies only the numeric ID and works without the overlay. The message clears when the lobby changes. Copying an ID does not grant access to a private, invitation-only lobby.
+
+The direct launchers select Steam networking but do not guarantee Steam Overlay activation. For an overlay check, add `DockCoop.exe` (Windows) or `DockCoop.app` (Mac) through **Steam → Games → Add a Non-Steam Game to My Library**, set its launch options to `--transport steam`, enable Steam Overlay, and launch it from the library. After a few seconds, check **Shift+Tab**, then Host and Invite. Valve also documents additional macOS signing entitlements; this development build does not configure them, so launching from the library alone is not a verified Mac fix. See [Valve's overlay requirements](https://partner.steamgames.com/doc/features/overlay), [non-Steam shortcuts](https://help.steampowered.com/en/faqs/view/4B8B-9697-2338-40EC) and [macOS requirements](https://partner.steamgames.com/doc/store/application/platforms#macos).
+
+The availability check runs on each click because Steam may take time to initialize the overlay. A successful API call means the dialog was requested, not that an invitation was sent or accepted. Lobby-ID joining remains the manually verified connection path.
 
 ## Design and authority
 

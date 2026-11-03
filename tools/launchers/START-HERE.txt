@@ -16,9 +16,11 @@ Allow the game through Windows Firewall. Internet IP mode requires port forwardi
 
 Steam Internet test: start Steam, sign in, run Steam.cmd (Steam.command on Mac).
 Host creates a friends-only lobby and displays its ID. Add the accounts as friends,
-enter that lobby ID on the other computer and choose Join. No IP or VPN is needed.
+use Copy lobby ID, paste it on the other computer and choose Join. No IP or VPN is needed.
 A second computer must use a different Steam account and the matching game build.
-The host can also open the invitation overlay where Steam overlay is available.
+Invite Steam friends opens the invitation dialog where Steam Overlay is available.
+If unavailable, the game explains the Copy lobby ID alternative. These buttons
+are enabled only after connecting to a lobby; they do not send invitations by themselves.
 AppID480 is for testing. Two-account Windows/Mac lobby-ID join and gameplay were
 manually verified on 3 November 2026; see docs/VERIFICATION.md for scope and gaps.
 

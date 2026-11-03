@@ -193,10 +193,28 @@ namespace Coop.Steam
             }
         }
 
-        public void OpenInviteOverlay()
+        public bool TryOpenInviteOverlay(out string error)
         {
-            if (initialized && lobby.HasValue)
-                SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
+            if (!initialized || !SteamClient.IsValid || !SteamClient.IsLoggedOn)
+            {
+                error = "Steam is unavailable. Start Steam and sign in.";
+                return false;
+            }
+            if (!lobby.HasValue)
+            {
+                error = "Host or join a session before inviting friends.";
+                return false;
+            }
+            if (!SteamUtils.IsOverlayEnabled)
+            {
+                error = "Steam Overlay is unavailable. Use Copy lobby ID, or launch the game from Steam with its overlay enabled.";
+                Debug.Log("[Steam] Invite dialog unavailable: overlay is not running.");
+                return false;
+            }
+            SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
+            Debug.Log("[Steam] Invite dialog requested for lobby " + LobbyId + ".");
+            error = "";
+            return true;
         }
 
         private void OnInvite(Lobby invited, SteamId inviter) => InviteJoinRequested?.Invoke(invited.Id.ToString());
@@ -302,7 +320,11 @@ namespace Coop.Steam
             Task.FromException(new PlatformNotSupportedException(Unavailable));
         public bool ValidateIdentity(ulong clientId, string playerId) => false;
         public ulong GetRtt(ulong clientId) => 0;
-        public void OpenInviteOverlay() => Debug.LogWarning(Unavailable);
+        public bool TryOpenInviteOverlay(out string error)
+        {
+            error = Unavailable;
+            return false;
+        }
         public void Tick() { }
         public void SetSessionState(bool inGame, int players, int maxPlayers) { }
         public void Shutdown() { }

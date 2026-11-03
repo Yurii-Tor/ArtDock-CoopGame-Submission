@@ -8,9 +8,13 @@ Steam Internet test (compatible with the matching Windows build):
 2. Start Steam on both computers and sign in with two different accounts.
    Add the accounts as friends for the default friends-only lobby.
 3. Run Steam.command on Mac and Steam.cmd on Windows.
-4. Choose Host on one computer. Copy its displayed lobby ID to the other
+4. Choose Host on one computer. Use Copy lobby ID and paste it in the other
    computer's lobby field and choose Join. No IP address or VPN is needed.
 5. The host presses Start game once both players are in the lobby.
+
+Invite Steam friends opens Steam's invitation dialog when its overlay is available.
+If unavailable, use Copy lobby ID as above. These buttons become available once
+connected to a lobby. Steam networking does not require the overlay.
 
 The bundled steam_appid.txt uses Valve's test AppID 480.
 For local/IP testing without Steam, open DockCoop.app directly or run
