@@ -19,6 +19,8 @@ If Steam initialization fails, the game presents a readable message. Start and s
 
 The forked community transport calls Facepunch's `CreateRelaySocket` / `ConnectRelay`: these use Steam Networking Sockets, allowing Steam to select direct connectivity or Steam Datagram Relay. Incoming connections must belong to the current lobby. Approval compares the supplied PlayerId with the authenticated transport peer's SteamID; UTP's local GUID has no equivalent authentication guarantee.
 
+Steam's initial and established-connection timeouts are configured as 15000 milliseconds (15 seconds). The adapter logs the values read back from the native API at initialization and the prepared lobby ID, so connection diagnostics distinguish lobby preparation from the subsequent NGO connection.
+
 Lobby metadata has a project-specific game key to avoid joining unrelated Spacewar lobbies. The host publishes name, original host, player count and game/lobby state. A full session is not joinable. Late join remains available while the game is running. Graceful host exit marks the lobby closed; loss of the original owner causes all clients to leave even if Steam transfers lobby ownership. There is no game host migration.
 
 NGO packet data is copied into a separate managed array per received message, avoiding shared-buffer overwrites when NGO defers processing. The local fork adds a one-byte message type and a nine-byte ping/pong once per second for host-observed RTT. This is application RTT including callback scheduling, not a raw link-latency measurement. Session-scoped native callback gates ignore stale disconnects after reconnecting. The fork's wire framing requires matching builds on both sides.

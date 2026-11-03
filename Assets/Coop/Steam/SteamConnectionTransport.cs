@@ -22,6 +22,7 @@ namespace Coop.Steam
     public sealed class SteamConnectionTransport : IConnectionTransport, IPlayerIdentity, IDisposable
     {
         private const uint AppId = 480;
+        private const int SteamTimeoutMilliseconds = 15000;
         private const string GameKey = "artdock-coop-workshop-v1";
         private readonly NetworkManager manager;
         private readonly SteamSessionOptions options;
@@ -57,8 +58,10 @@ namespace Coop.Steam
                 if (!SteamClient.IsValid || !SteamClient.IsLoggedOn)
                     throw new InvalidOperationException("Steam must be running and signed in.");
                 SteamNetworkingUtils.InitRelayNetworkAccess();
-                SteamNetworkingUtils.ConnectionTimeout = 15;
-                SteamNetworkingUtils.Timeout = 15;
+                // Facepunch passes these values directly to Steam; both settings are milliseconds.
+                SteamNetworkingUtils.ConnectionTimeout = SteamTimeoutMilliseconds;
+                SteamNetworkingUtils.Timeout = SteamTimeoutMilliseconds;
+                Debug.Log($"[Steam] Relay timeout: initial={SteamNetworkingUtils.ConnectionTimeout} ms, connected={SteamNetworkingUtils.Timeout} ms.");
                 SteamFriends.OnGameLobbyJoinRequested += OnInvite;
                 SteamFriends.OnGameRichPresenceJoinRequested += OnPresenceJoin;
                 SteamMatchmaking.OnLobbyDataChanged += OnLobbyChanged;
@@ -140,6 +143,7 @@ namespace Coop.Steam
             transport.AcceptPeer = steamId => lobby.HasValue && lobby.Value.Members.Any(member => member.Id.Value == steamId);
             manager.NetworkConfig.NetworkTransport = transport;
             lastPresence = null;
+            Debug.Log($"[Steam] Prepared {(hosting ? "host" : "client")} lobby {LobbyId}.");
         }
 
         private static async void LeaveLateLobby(Task<Lobby?> pending)

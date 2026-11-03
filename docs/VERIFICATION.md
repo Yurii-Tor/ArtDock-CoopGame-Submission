@@ -74,3 +74,13 @@ Both platforms now use the matching Facepunch 2.5.2 wrappers and native Steam ru
 The one-account result does not establish a connection between two Steam users, cross-platform gameplay, invites or overlay behavior. Those checks remain pending. The FPS policy is configured in code; headless tests do not measure rendered frame rate or physical focus transitions.
 
 The new matching archives are `Artifacts/DockCoop-Windows-Steam.zip` and `Artifacts/DockCoop-macOS-Steam.zip`; their launch instructions use Steam lobby IDs for Internet play. The earlier UTP archives and v0.1.0 release are separate artifacts.
+
+## Steam timeout units correction — 3 November 2026
+
+Facepunch's `ConnectionTimeout` and `Timeout` properties use milliseconds. The original adapter passed `15`, allowing only 15 ms instead of the intended 15 seconds. Both now use the named constant `SteamTimeoutMilliseconds = 15000`.
+
+- Windows and Universal macOS builds passed without C# errors or warnings (`COOP_BUILD_OK 158537791`, `COOP_MAC_BUILD_OK 317940224`).
+- The updated Windows player read back `initial=15000 ms, connected=15000 ms` from the native API, prepared a real Steam lobby and reached `[Session] Connected.`; see `Artifacts/steam-timeout-validation.log`. The test process was stopped afterward.
+- The previous Mac player was launched and its Join action exercised. Its supplied log reported `Enter the numeric Steam lobby ID`, a validation rejection before Steam matchmaking. This does not demonstrate a transport timeout or a completed remote connection.
+
+The corrected matching archives use the `Steam-r2` suffix. A two-account connection and cross-platform gameplay remain pending; the native timeout readback is not evidence of their success.
