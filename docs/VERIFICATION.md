@@ -94,7 +94,10 @@ Executable source revision: `bb3f937c09246a409de4947755978fb6865ba0e8` (Steam r2
 | Steam lobby-ID join | PASS, tester-reported: both players appeared in the same lobby |
 | Shared game start | PASS, tester-reported: the session entered gameplay |
 | Gameplay controls | PASS, tester-reported: all controls were exercised; this is not a separately recorded per-control/per-platform matrix |
+| Client rejoin while host holds a cube | PASS, tester-reported: the returning client starts at the default spawn position and the host continues holding the cube; player position is not persisted across connections |
+| Client leaves while holding a cube | PASS, tester-reported: the client avatar disappears and the cube falls; host logs corroborate `Disconnect drop` for clients6,8,9 with ownership returned to host0 |
+| Host leaves the session | PASS, tester-reported: leaving as host ends the session for everyone; this was a graceful session leave, not a forced host-process termination test |
 | Remote item interaction | Host log corroborates remote `sender=1` grab/release requests and item ownership changing to client1 and back to host0 |
 | Held-item access check | Host log shows attempts to grab an item already held by client1 being rejected; this does not establish a simultaneous free-item race test |
 
-Local evidence: `Artifacts/steam-manual-host-r2.log`. The record combines the tester's report with host-side logs; the assistant did not independently inspect both screens. It establishes actual cross-platform Steam gameplay, without identifying the direct/SDR route or claiming overlay/invitation, late-join, disconnect or host-loss checks that were not yet reported for this session.
+Local evidence: `Artifacts/steam-manual-host-r2.log`. The record combines the tester's report with host-side logs; the assistant did not independently inspect both screens. It establishes actual cross-platform Steam gameplay, rejoin and graceful session-exit behavior. The direct/SDR route, overlay/invitation/private-lobby flows, simultaneous free-item race and forced process termination over Steam were not established by this manual session. Earlier automated UTP crash tests remain separate evidence.
