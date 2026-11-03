@@ -1,5 +1,5 @@
 // Adapted from Unity's MIT-licensed community Facepunch transport. See LICENSE.md and UPSTREAM.md.
-#if UNITY_EDITOR_WIN || (UNITY_STANDALONE_WIN && !UNITY_EDITOR)
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || ((UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

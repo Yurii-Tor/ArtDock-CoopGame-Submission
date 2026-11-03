@@ -28,11 +28,13 @@ Windows PowerShell equivalents, from the extracted directory:
 .\DockCoop.exe --join --profile lan-client --name Client --address 192.168.1.50 --port 7777 -logFile client.log
 ```
 
-Run the second command on the other PC and replace the example address. For the native macOS build, use the same menu fields and UTP transport; the host can be either platform. `Host-LAN.command` hosts, and `Join-LAN.command` prompts for the host's address. Follow `START-HERE-macOS.txt` in its archive. This macOS build supports UTP only; the bundled Steam integration is Windows x64.
+Run the second command on the other PC and replace the example address. For the native macOS build, use the same menu fields and UTP transport; the host can be either platform. `Host-LAN.command` hosts, and `Join-LAN.command` prompts for the host's address. Follow `START-HERE-macOS.txt` in its archive. For Steam Internet play, run `Steam.cmd` on Windows and `Steam.command` on Mac, then use a lobby ID instead of an IP address.
 
 For a third/fourth player, extra local copies with distinct `--profile` values are sufficient to test capacity. A VM cloned after a previous launch can inherit a saved local GUID; give the clone a new profile. Display names alone do not change identity.
 
 ## Internet and VM alternatives
+
+The bundled Steam transport is the first option for two supported computers on different networks. Sign in with different Steam accounts, add them as friends, launch both Steam scripts and join the host's displayed lobby ID. Steam handles connectivity without configuring a VPN or host port forwarding. Verify this path with the Steam checklist below.
 
 Direct UTP over the Internet requires reachable host UDP: forward external UDP `7777` to the host's LAN address/port and connect to the public address. Carrier-grade NAT may prevent this. A successful LAN run does not prove this path.
 

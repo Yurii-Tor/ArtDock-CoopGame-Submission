@@ -140,6 +140,7 @@ namespace Coop.Editor
             });
             if (report.summary.result != BuildResult.Succeeded)
                 throw new System.Exception("macOS build failed: " + report.summary.result);
+            File.WriteAllText("Builds/macOS/steam_appid.txt", "480\n");
             foreach (var launcher in Directory.GetFiles("tools/launchers-macos"))
                 File.Copy(launcher, Path.Combine("Builds/macOS", Path.GetFileName(launcher)), true);
             Debug.Log("COOP_MAC_BUILD_OK " + report.summary.totalSize);

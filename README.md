@@ -8,7 +8,9 @@ Open with **Unity 6000.3.21f1 LTS**, open `Assets/Coop/Generated/Menu.unity`, an
 
 Windows build: extract the whole archive, keep the data and DLL folders alongside the executable. Host starts a lobby, clients join, then the host clicks **Start game**. A late joiner joins the same address while the session is playing.
 
-The macOS Universal build supports macOS 12 or newer on Intel and Apple Silicon and connects to Windows using UTP/IP. Extract the whole archive, open `DockCoop.app`, or use `Host-LAN.command` / `Join-LAN.command`. The macOS build does not include the Windows Steam adapter and has not yet been run on a physical Mac. See the [manual testing procedure](docs/MANUAL-TESTING.md) for LAN, VM and Internet setups.
+The macOS Universal build supports macOS 12 or newer on Intel and Apple Silicon, with both Steam and UTP/IP transports. For Internet play, start Steam under different accounts on the two computers, add them as friends, then run `Steam.cmd` on Windows and `Steam.command` on Mac. Host creates a lobby; the other player enters its displayed lobby ID and joins. A VPN or shared local network is not required in Steam mode. Live Windows-to-Mac Steam play remains a manual verification step. See [Steam setup](docs/STEAM.md).
+
+For local/IP testing, open `DockCoop.app` directly or use `Host-LAN.command` / `Join-LAN.command`. Rendering is capped at 60 FPS while focused and 30 FPS in the background; networking continues while unfocused. See the [manual testing procedure](docs/MANUAL-TESTING.md).
 
 ```powershell
 .\DockCoop.exe --host --profile host --name Alice --port 7777

@@ -6,6 +6,7 @@
     ],
     "includePlatforms": [
         "Editor",
+        "macOSStandalone",
         "WindowsStandalone64"
     ],
     "excludePlatforms": [],

@@ -1,4 +1,4 @@
-#if UNITY_EDITOR_WIN || (UNITY_STANDALONE_WIN && !UNITY_EDITOR)
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || ((UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
 using System;
 using System.Globalization;
 using System.Linq;
@@ -276,10 +276,10 @@ namespace Coop.Steam
         public bool FriendsOnly = true;
     }
 
-    /// <summary>The optional native Steam adapter is distributed for Windows only.</summary>
+    /// <summary>Fallback for platforms without the bundled Windows/macOS Steam bindings.</summary>
     public sealed class SteamConnectionTransport : IConnectionTransport, IPlayerIdentity, IDisposable
     {
-        const string Unavailable = "Steam transport is available in the Windows build only. Restart without --transport steam to use IP/port (UTP).";
+        const string Unavailable = "Steam transport is available in the Windows and macOS builds. Restart without --transport steam to use IP/port (UTP).";
 
         public SteamConnectionTransport(NetworkManager manager, SteamSessionOptions options) { }
         public event Action<string> InviteJoinRequested { add { } remove { } }

@@ -55,6 +55,22 @@ The original time estimate above covers the initial Windows implementation. The 
 | Session policy checks | All 32 PASS again |
 | Windows multiplayer regression | PASS; `Artifacts/gameplay-20261103-185210/`, `GAMEPLAY_SUITE_PASS`; impaired client, held-state late join, killed holder, fresh connection and host-loss handling |
 
-The macOS application has not been executed on a Mac. Cross-platform sessions, physical input, Finder launch, Gatekeeper acceptance and Steam remain manual checks; compilation and structural archive inspection do not establish those results. The macOS build uses UTP only. The development app has no Developer ID notarization. Follow [MANUAL-TESTING.md](MANUAL-TESTING.md) and the archive's `START-HERE-macOS.txt` for the next run.
+The initial macOS application had not been executed on a Mac. Cross-platform sessions, physical input, Finder launch and Gatekeeper acceptance remain manual checks; compilation and structural archive inspection do not establish those results. That initial macOS build used UTP only; the subsequent Steam update is recorded below. The development app has no Developer ID notarization. Follow [MANUAL-TESTING.md](MANUAL-TESTING.md) and the archive's `START-HERE-macOS.txt` for the next run.
 
 The follow-up pair is packaged locally as `Artifacts/DockCoop-macOS.zip` and `Artifacts/DockCoop-Windows-CrossPlatform.zip`, with the source revision in each `BUILD-INFO.txt` and checksums in `Artifacts/CROSS-PLATFORM-SHA256SUMS.txt`. The Windows v0.1.0 release remains a separate recorded build.
+
+## Cross-platform Steam update — 3 November 2026
+
+Both platforms now use the matching Facepunch 2.5.2 wrappers and native Steam runtime. `Steam.cmd` (Windows) and `Steam.command` (macOS) select the same existing lobby/socket adapter and wire framing. The Mac launcher and its AppID 480 file are included in the build. vSync is disabled so rendering follows the configured 60 FPS focused / 30 FPS unfocused cap; NGO tick rate and physics timestep are unchanged.
+
+| Check | Result / evidence |
+|---|---|
+| Windows build | PASS; `Artifacts/build.log`, `COOP_BUILD_OK 158537272`; no C# errors or warnings |
+| Universal macOS build | PASS; `Artifacts/build-macos.log`, `COOP_MAC_BUILD_OK 317939700`; no C# errors or warnings |
+| Mac Steam dependencies | Posix managed wrapper and universal `libsteam_api.dylib` included; native minimums are 10.13 Intel / 11.0 ARM64; Unity app minimum remains 12.0 |
+| Real Steam host initialization, one account | PASS; Steam running on Windows, game launched with `-batchmode -nographics --transport steam --host`; `Artifacts/steam-host-validation.log` reaches `[Session] Connected.` after Steam lobby preparation and NGO host startup; test process stopped afterward |
+| Windows multiplayer regression after FPS/dependency changes | PASS; `Artifacts/gameplay-20261103-203321/`, `GAMEPLAY_SUITE_PASS`; impaired connection, held-state late join, killed holder, fresh connection and host loss; processes run without graphics and are cleaned up by the script |
+
+The one-account result does not establish a connection between two Steam users, cross-platform gameplay, invites or overlay behavior. Those checks remain pending. The FPS policy is configured in code; headless tests do not measure rendered frame rate or physical focus transitions.
+
+The new matching archives are `Artifacts/DockCoop-Windows-Steam.zip` and `Artifacts/DockCoop-macOS-Steam.zip`; their launch instructions use Steam lobby IDs for Internet play. The earlier UTP archives and v0.1.0 release are separate artifacts.

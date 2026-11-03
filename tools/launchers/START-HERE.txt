@@ -14,9 +14,14 @@ right mouse throw; X delete held item; C colour; Tab/Escape menu and player list
 Two PCs: run DockCoop.exe directly and enter the host's LAN IP and UDP port7777.
 Allow the game through Windows Firewall. Internet IP mode requires port forwarding.
 
-Steam: start Steam, sign in, run Steam.cmd. Host creates a lobby, displays its ID,
-and can open the invitation overlay. A second PC must use a different Steam account.
+Steam Internet test: start Steam, sign in, run Steam.cmd (Steam.command on Mac).
+Host creates a friends-only lobby and displays its ID. Add the accounts as friends,
+enter that lobby ID on the other computer and choose Join. No IP or VPN is needed.
+A second computer must use a different Steam account and the matching game build.
+The host can also open the invitation overlay where Steam overlay is available.
 AppID480 is for testing. Steam integration has not been verified with two accounts.
+
+Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 
 Source, technical README and verification details:
 https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission

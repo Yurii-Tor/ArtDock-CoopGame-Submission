@@ -2,23 +2,27 @@ Dock Co-op - macOS Universal (Intel and Apple Silicon)
 
 Requires macOS 12 or newer.
 
-This review build uses IP/port (Unity Transport), compatible with the Windows
-build. The optional Steam adapter is included only in the Windows build.
+Steam Internet test (compatible with the matching Windows build):
 
 1. Extract the whole ZIP; keep the .app and .command files together.
-2. Open DockCoop.app. Use Host on one computer. On the other computer enter
-   the host's LAN/VPN IPv4 address and port 7777, then choose Join.
-3. The host presses Start game once both players are in the lobby.
-4. Alternatively run Host-LAN.command or Join-LAN.command from this folder.
-   Join-LAN.command asks for the host IP. 127.0.0.1 is only for the same Mac.
+2. Start Steam on both computers and sign in with two different accounts.
+   Add the accounts as friends for the default friends-only lobby.
+3. Run Steam.command on Mac and Steam.cmd on Windows.
+4. Choose Host on one computer. Copy its displayed lobby ID to the other
+   computer's lobby field and choose Join. No IP address or VPN is needed.
+5. The host presses Start game once both players are in the lobby.
+
+The bundled steam_appid.txt uses Valve's test AppID 480.
+For local/IP testing without Steam, open DockCoop.app directly or run
+Host-LAN.command / Join-LAN.command. In that mode use the host's actual
+LAN/VPN address; 127.0.0.1 is only for copies running on the same Mac.
 
 Controls: WASD move, mouse look, Space jump, F spawn cube, E grab/drop,
 right mouse button throw, X delete held cube, C change player color,
 Tab/Escape show session controls and release the cursor.
 
-Use the same local network for the first cross-platform check. Allow the host
-application's incoming UDP traffic on port 7777 through its firewall. Two
-computers on unrelated networks need a reachable host address or a VPN.
+Rendering is capped at 60 FPS when focused and 30 FPS in the background.
+The game continues networking while unfocused.
 
 This development build is not Developer-ID-notarized and has not been run on
 a physical Mac. After checking the trusted source and SHA256 checksum, if
