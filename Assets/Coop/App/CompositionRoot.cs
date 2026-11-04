@@ -30,6 +30,7 @@ namespace Coop.App
         public string Notice { get; private set; } = "";
         GameplayServices gameplay;
         IGameStats stats;
+        bool frameRateInitialized;
         void Awake()
         {
             DontDestroyOnLoad(gameObject);
@@ -40,7 +41,10 @@ namespace Coop.App
             background.cullingMask = 0;
             background.depth = -100;
             Application.runInBackground = true;
-            Application.targetFrameRate = 60;
+            // Desktop VSync otherwise overrides targetFrameRate with the display refresh rate.
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = Application.isFocused ? 60 : 30;
+            frameRateInitialized = true;
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             Physics.IgnoreLayerCollision(8, 9, true);
             Physics.IgnoreLayerCollision(8, 8, true);
@@ -79,6 +83,11 @@ namespace Coop.App
                 gameObject.AddComponent<LifecycleProbe>().Initialize(this);
             if (Options.Has("capture"))
                 gameObject.AddComponent<FrameRecorder>().Begin(Options.Get("capture"));
+        }
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (frameRateInitialized)
+                Application.targetFrameRate = hasFocus ? 60 : 30;
         }
         void InjectPlayer(PlayerAvatar avatar) => avatar.Configure(gameplay);
         void SceneLoaded(Scene scene, LoadSceneMode mode)

@@ -119,5 +119,31 @@ namespace Coop.Editor
                 throw new System.Exception("Build failed: " + report.summary.result);
             Debug.Log("COOP_BUILD_OK " + report.summary.totalSize);
         }
+
+        [MenuItem("Coop/Build macOS")]
+        public static void BuildMacOS()
+        {
+            Generate();
+            if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX))
+                throw new System.InvalidOperationException("Install Mac Build Support (Mono) for this Unity editor first.");
+
+            // Unity's standalone build setting chooses both native CPU slices in one .app.
+            EditorUserBuildSettings.SetPlatformSettings("Standalone", "OSXUniversal", "Architecture", "x64ARM64");
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Standalone, "com.yuriitor.dockcoop");
+            Directory.CreateDirectory("Builds/macOS");
+            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+            {
+                scenes = new[] { Generated + "/Menu.unity", Generated + "/Arena.unity" },
+                locationPathName = "Builds/macOS/DockCoop.app",
+                target = BuildTarget.StandaloneOSX,
+                options = BuildOptions.Development
+            });
+            if (report.summary.result != BuildResult.Succeeded)
+                throw new System.Exception("macOS build failed: " + report.summary.result);
+            File.WriteAllText("Builds/macOS/steam_appid.txt", "480\n");
+            foreach (var launcher in Directory.GetFiles("tools/launchers-macos"))
+                File.Copy(launcher, Path.Combine("Builds/macOS", Path.GetFileName(launcher)), true);
+            Debug.Log("COOP_MAC_BUILD_OK " + report.summary.totalSize);
+        }
     }
 }

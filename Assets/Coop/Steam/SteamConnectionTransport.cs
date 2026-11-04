@@ -1,3 +1,4 @@
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || ((UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
 using System;
 using System.Globalization;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace Coop.Steam
     public sealed class SteamConnectionTransport : IConnectionTransport, IPlayerIdentity, IDisposable
     {
         private const uint AppId = 480;
+        private const int SteamTimeoutMilliseconds = 15000;
         private const string GameKey = "artdock-coop-workshop-v1";
         private readonly NetworkManager manager;
         private readonly SteamSessionOptions options;
@@ -56,8 +58,10 @@ namespace Coop.Steam
                 if (!SteamClient.IsValid || !SteamClient.IsLoggedOn)
                     throw new InvalidOperationException("Steam must be running and signed in.");
                 SteamNetworkingUtils.InitRelayNetworkAccess();
-                SteamNetworkingUtils.ConnectionTimeout = 15;
-                SteamNetworkingUtils.Timeout = 15;
+                // Facepunch passes these values directly to Steam; both settings are milliseconds.
+                SteamNetworkingUtils.ConnectionTimeout = SteamTimeoutMilliseconds;
+                SteamNetworkingUtils.Timeout = SteamTimeoutMilliseconds;
+                Debug.Log($"[Steam] Relay timeout: initial={SteamNetworkingUtils.ConnectionTimeout} ms, connected={SteamNetworkingUtils.Timeout} ms.");
                 SteamFriends.OnGameLobbyJoinRequested += OnInvite;
                 SteamFriends.OnGameRichPresenceJoinRequested += OnPresenceJoin;
                 SteamMatchmaking.OnLobbyDataChanged += OnLobbyChanged;
@@ -139,6 +143,7 @@ namespace Coop.Steam
             transport.AcceptPeer = steamId => lobby.HasValue && lobby.Value.Members.Any(member => member.Id.Value == steamId);
             manager.NetworkConfig.NetworkTransport = transport;
             lastPresence = null;
+            Debug.Log($"[Steam] Prepared {(hosting ? "host" : "client")} lobby {LobbyId}.");
         }
 
         private static async void LeaveLateLobby(Task<Lobby?> pending)
@@ -188,10 +193,28 @@ namespace Coop.Steam
             }
         }
 
-        public void OpenInviteOverlay()
+        public bool TryOpenInviteOverlay(out string error)
         {
-            if (initialized && lobby.HasValue)
-                SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
+            if (!initialized || !SteamClient.IsValid || !SteamClient.IsLoggedOn)
+            {
+                error = "Steam is unavailable. Start Steam and sign in.";
+                return false;
+            }
+            if (!lobby.HasValue)
+            {
+                error = "Host or join a session before inviting friends.";
+                return false;
+            }
+            if (!SteamUtils.IsOverlayEnabled)
+            {
+                error = "Steam Overlay is unavailable. Use Copy lobby ID, or launch the game from Steam with its overlay enabled.";
+                Debug.Log("[Steam] Invite dialog unavailable: overlay is not running.");
+                return false;
+            }
+            SteamFriends.OpenGameInviteOverlay(lobby.Value.Id);
+            Debug.Log("[Steam] Invite dialog requested for lobby " + LobbyId + ".");
+            error = "";
+            return true;
         }
 
         private void OnInvite(Lobby invited, SteamId inviter) => InviteJoinRequested?.Invoke(invited.Id.ToString());
@@ -260,3 +283,52 @@ namespace Coop.Steam
         }
     }
 }
+#else
+using System;
+using System.Threading.Tasks;
+using Coop.Infrastructure;
+using Unity.Netcode;
+using UnityEngine;
+
+namespace Coop.Steam
+{
+    public sealed class SteamSessionOptions
+    {
+        public string LobbyName = "Coop Workshop";
+        public bool FriendsOnly = true;
+    }
+
+    /// <summary>Fallback for platforms without the bundled Windows/macOS Steam bindings.</summary>
+    public sealed class SteamConnectionTransport : IConnectionTransport, IPlayerIdentity, IDisposable
+    {
+        const string Unavailable = "Steam transport is available in the Windows and macOS builds. Restart without --transport steam to use IP/port (UTP).";
+
+        public SteamConnectionTransport(NetworkManager manager, SteamSessionOptions options) { }
+        public event Action<string> InviteJoinRequested { add { } remove { } }
+        public event Action<string> SessionEnded { add { } remove { } }
+        public string LobbyId => "";
+        public string PlayerId => "";
+        public string DisplayName => "";
+
+        public bool TryInitialize(out string error)
+        {
+            error = Unavailable;
+            return false;
+        }
+
+        public Task PrepareAsync(bool isHost, string address, ushort port, int maxPlayers) =>
+            Task.FromException(new PlatformNotSupportedException(Unavailable));
+        public bool ValidateIdentity(ulong clientId, string playerId) => false;
+        public ulong GetRtt(ulong clientId) => 0;
+        public bool TryOpenInviteOverlay(out string error)
+        {
+            error = Unavailable;
+            return false;
+        }
+        public void Tick() { }
+        public void SetSessionState(bool inGame, int players, int maxPlayers) { }
+        public void Shutdown() { }
+        public void Dispose() { }
+    }
+}
+#endif
