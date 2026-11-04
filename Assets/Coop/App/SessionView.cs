@@ -16,8 +16,10 @@ namespace Coop.App
         GameObject panel;
         GameObject connectionPanel;
         InputField nameInput, addressInput, portInput;
-        Text status, roster, hud, scoreboard;
-        Button host, join, start, leave;
+        Text status, roster, hud, scoreboard, inviteHint;
+        Button host, join, start, leave, invite, copyLobby;
+        string inviteNotice = "";
+        string inviteLobbyId = "";
         Transform kickRows;
         float refreshAt;
         bool shown = true;
@@ -65,7 +67,27 @@ namespace Coop.App
             host = Button(connectionPanel.transform, "Host session", () => Connect(true));
             join = Button(connectionPanel.transform, "Join session", () => Connect(false));
             if (root.Transport is Coop.Steam.SteamConnectionTransport steam)
-                Button(panel.transform, "Invite Steam friends", () => steam.OpenInviteOverlay());
+            {
+                var actions = new GameObject("Steam invitations", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+                actions.transform.SetParent(panel.transform, false);
+                var actionsLayout = actions.GetComponent<HorizontalLayoutGroup>();
+                actionsLayout.spacing = 7;
+                actionsLayout.childForceExpandWidth = true;
+                actionsLayout.childForceExpandHeight = false;
+                invite = Button(actions.transform, "Invite Steam friends", () =>
+                    inviteNotice = steam.TryOpenInviteOverlay(out var error)
+                        ? "Steam invite dialog requested. If it does not appear, use Copy lobby ID."
+                        : error);
+                copyLobby = Button(actions.transform, "Copy lobby ID", () =>
+                {
+                    if (string.IsNullOrEmpty(steam.LobbyId))
+                        return;
+                    GUIUtility.systemCopyBuffer = steam.LobbyId;
+                    inviteNotice = "Lobby ID copied. Send it to a friend to paste into the Steam lobby ID field.";
+                });
+                invite.interactable = copyLobby.interactable = false;
+                inviteHint = Label(panel.transform, "Host or join a session to invite friends.", 14, 58);
+            }
             start = Button(panel.transform, "Start game", () => root.Session.StartGame());
             leave = Button(panel.transform, "Leave session", () => root.Session.Leave());
             status = Label(panel.transform, "Ready", 15, 54);
@@ -133,11 +155,26 @@ namespace Coop.App
             start.gameObject.SetActive(network.IsHost && session.State != null && !playing);
             leave.gameObject.SetActive(network.IsListening || session.IsBusy);
             status.text = session.Status + (session.State != null ? "\n" + session.State.Phase.Value : "") + (root.Transport is Coop.Steam.SteamConnectionTransport steam ? "\nLobby: " + steam.LobbyId : "");
+            if (root.Transport is Coop.Steam.SteamConnectionTransport steamInvites)
+            {
+                var lobbyId = steamInvites.LobbyId;
+                if (inviteLobbyId != lobbyId)
+                {
+                    inviteLobbyId = lobbyId;
+                    inviteNotice = "";
+                }
+                bool canInvite = network.IsConnectedClient && !string.IsNullOrEmpty(lobbyId);
+                invite.interactable = copyLobby.interactable = canInvite;
+                inviteHint.text = !canInvite ? "Host or join a session to invite friends."
+                    : !string.IsNullOrEmpty(inviteNotice) ? inviteNotice
+                    : "Invite friends through Steam Overlay, or copy the lobby ID.";
+            }
             var sb = new StringBuilder();
             if (session.State != null)
                 foreach (var p in session.State.Players)
                     sb.AppendLine($"{p.Name}  ·  {p.Rtt} ms  ·  {(p.Ready ? "ready" : "loading / lobby")}");
             roster.text = sb.ToString();
+            roster.gameObject.SetActive(session.State != null);
             scoreboard.text = playing ? "SESSION / " + session.State.Players.Count + " of " + session.State.PlayerLimit.Value + "\n" + sb : "";
             hud.text = playing ? "WASD move · Mouse look · Space jump · F spawn · E grab/drop · Right click throw · X delete · C colour\nTab / Esc: players & cursor    " + root.Notice : "Host a session or join a host. The host starts the level once everyone is in the lobby.";
             foreach (Transform child in kickRows)
