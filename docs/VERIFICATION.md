@@ -35,7 +35,7 @@ Run the build with `--race` on one host and one client for the contested-item pr
 ## Remaining manual verification
 
 - Direct UTP between two physical computers over LAN/public IP. The separate Internet Steam path was verified below.
-- Steam overlay invitations, private-lobby access, Join Game, Steam-unavailable startup, and identifying the actual direct/SDR route. AppID480 does not permit configuring this project's localized Rich Presence display.
+- Private-lobby access, the separate Steam **Join Game** action, Steam-unavailable startup, forced process termination over Steam, and identifying the actual direct/SDR route. Windows overlay/button use, cross-platform **Invite to Game** joining and host kick were subsequently confirmed in the 4 November follow-up below. AppID480 does not permit configuring this project's localized Rich Presence display.
 - A detailed per-control matrix for both host/client roles and physical input directly at the Mac. The tester reported exercising all controls, with the remote Mac operated through RustDesk; see the recorded scope below.
 - Forced process termination precisely during scene loading. The disconnect-unblocks-barrier policy is tested; the tiny scene transition was not deterministically interrupted in the process tests.
 - Bandwidth profiling and subjective movement smoothness under varied network conditions. The configured rates/thresholds are documented, not presented as measured bandwidth.
@@ -109,6 +109,20 @@ The invitation button now checks Steam and overlay availability and displays fee
 - Windows and Universal macOS builds passed with no C# errors or warnings: `COOP_BUILD_OK 158540291`, `COOP_MAC_BUILD_OK 317942720`.
 - Source review covered both platform branches, UI refresh, lobby-change reset and panel layout. This is not a runtime visual check.
 - The updated packages use the `Steam-r3` suffix. Earlier two-computer gameplay evidence above refers to r2. This update does not change the wire protocol or gameplay.
-- Opening the Steam invitation dialog and accepting an invitation remain manually unverified. The reported absence of a dialog does not establish its exact cause; the new availability check distinguishes an unavailable overlay from a dialog request.
+- At this build/review stage, opening the Steam invitation dialog and accepting an invitation had not yet been verified. The new availability check distinguishes an unavailable overlay from a dialog request; the subsequent manual result is recorded below.
 
 To verify the UI, launch in Steam mode, confirm both buttons are disabled before Host/Join, then create a lobby. Copy its ID and paste it into a text field; it must match the displayed numeric ID. Click Invite: an unavailable overlay must produce a readable message that survives subsequent UI refreshes. With the overlay available, confirm the invitation dialog opens and a friend can accept it. Leave and create a new lobby to confirm the prior feedback clears. See [STEAM.md](STEAM.md#invitation-button-and-overlay-availability) for overlay launch requirements.
+
+## Steam-library invitation and kick follow-up — 4 November 2026
+
+The tester reported that Windows Shift+Tab and the invitation button did not open an overlay with the direct launcher. After adding the executable to Steam's library, setting `--transport steam` and launching with Steam's Play button, both worked. The same library setup was then applied to the Mac, with a per-app Gatekeeper exception for the unnotarized build.
+
+| Check | Result / evidence |
+|---|---|
+| Windows overlay and in-game invitation button | PASS, tester-reported after launching from the Steam library |
+| Steam invitation followed by cross-platform join | PASS, tester-reported: right-click friend in Steam's overlay/menu, choose **Invite to Game**, and the invited friend joins the session |
+| Host kick in the Windows/Mac Steam session | PASS, tester-reported |
+
+These results extend the earlier two-account Windows/Mac gameplay checks. They confirm an invitation-based join and kick, not just that an invitation API was called. The report does not separately establish opening Shift+Tab/the invitation button on Mac, the **Join Game** action, private-lobby permissions, the chosen direct/SDR route, or a forced Steam host-process crash.
+
+The supplied r3 executables were built from `feca9e1deb183411c0f9db8597304501a050a451`. This follow-up updates instructions and evidence without rebuilding game code; each archive's `BUILD-INFO.txt` distinguishes executable source from documentation revision. Follow [README](../README.md#reviewer-quick-start-steam-on-two-computers) or [STEAM.md](STEAM.md) to reproduce the tested library-launch and invitation flow.

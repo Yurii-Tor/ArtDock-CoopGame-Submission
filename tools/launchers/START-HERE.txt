@@ -2,27 +2,45 @@ DOCK CO-OP - Windows review build
 
 Extract the whole archive. Keep the executable, data directory and DLLs together.
 
-Local test on one PC:
-1. Run Host-Local.cmd.
-2. Run Client-1-Local.cmd (and optionally Client-2-Local.cmd).
-3. On the host click Start game.
-4. To test late join, start the second client after the game starts.
+Recommended review: Steam on Windows + Windows or Windows + Mac.
+Use two computers and two different Steam accounts added as friends.
+
+1. Steam > Games > Add a Non-Steam Game to My Library > Browse.
+   Select DockCoop.exe from this extracted folder.
+2. Open its Steam library Properties. Set Launch Options to:
+   --transport steam
+   Set Start In to this folder containing DockCoop.exe and steam_appid.txt.
+3. Enable Steam Overlay in Steam > Settings > In Game. Launch with Play in
+   the Steam library and check Shift+Tab. Use the same setup with
+   DockCoop.app on Mac; see START-HERE-macOS.txt in its archive.
+4. One player chooses Host session; the other stays in the game's main menu.
+   Host: Shift+Tab > right-click friend > Invite to Game.
+   Guest: accept the invitation. Both names should appear in the lobby.
+5. The host clicks Start game. Test the controls below on both computers.
+6. Host: Tab/Escape > Kick [player name]. The guest should leave the session
+   while the host stays connected. Rejoin to continue other checks.
+
+Invite Steam friends also opens Steam's invitation dialog from inside a lobby.
+For invitations, launch from the Steam library. Direct Steam.cmd launch selects
+Steam networking but does not guarantee overlay activation.
+
+Alternative: host > Copy lobby ID; guest pastes the numeric ID into
+IP address / Steam lobby ID (replace 127.0.0.1), then Join session.
+This works without the overlay. The UDP port field is not used in Steam mode.
+No VPN, port forwarding or shared LAN is needed. Keep steam_appid.txt (480).
 
 WASD move; mouse look; Space jump; F spawn; E grab/drop;
 right mouse throw; X delete held item; C colour; Tab/Escape menu and player list.
 
-Two PCs: run DockCoop.exe directly and enter the host's LAN IP and UDP port7777.
-Allow the game through Windows Firewall. Internet IP mode requires port forwarding.
+Local test on one PC without Steam:
+Run Host-Local.cmd and Client-1-Local.cmd (optionally Client-2-Local.cmd),
+then Start game on the host. Start another client during gameplay for late join.
+For UTP on two PCs on one LAN, run DockCoop.exe directly, use the host's actual
+LAN address and UDP port 7777, and allow the game through Windows Firewall.
 
-Steam Internet test: start Steam, sign in, run Steam.cmd (Steam.command on Mac).
-Host creates a friends-only lobby and displays its ID. Add the accounts as friends,
-use Copy lobby ID, paste it on the other computer and choose Join. No IP or VPN is needed.
-A second computer must use a different Steam account and the matching game build.
-Invite Steam friends opens the invitation dialog where Steam Overlay is available.
-If unavailable, the game explains the Copy lobby ID alternative. These buttons
-are enabled only after connecting to a lobby; they do not send invitations by themselves.
-AppID480 is for testing. Two-account Windows/Mac lobby-ID join and gameplay were
-manually verified on 3 November 2026; see docs/VERIFICATION.md for scope and gaps.
+Manual Windows/Mac coverage includes gameplay, rejoin, graceful disconnect,
+Steam friends-menu invitation-to-join and host kick. See README.md,
+docs/STEAM.md and docs/VERIFICATION.md for setup, evidence and remaining checks.
 
 Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 

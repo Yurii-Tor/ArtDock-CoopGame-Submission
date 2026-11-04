@@ -28,17 +28,15 @@ Windows PowerShell equivalents, from the extracted directory:
 .\DockCoop.exe --join --profile lan-client --name Client --address 192.168.1.50 --port 7777 -logFile client.log
 ```
 
-Run the second command on the other PC and replace the example address. For the native macOS build, use the same menu fields and UTP transport; the host can be either platform. `Host-LAN.command` hosts, and `Join-LAN.command` prompts for the host's address. Follow `START-HERE-macOS.txt` in its archive. For Steam Internet play, run `Steam.cmd` on Windows and `Steam.command` on Mac, then use a lobby ID instead of an IP address.
+Run the second command on the other PC and replace the example address. For the native macOS build, use the same menu fields and UTP transport; the host can be either platform. `Host-LAN.command` hosts, and `Join-LAN.command` prompts for the host's address. Follow `START-HERE-macOS.txt` in its archive. For Steam Internet play and invitations, use the Steam-library procedure below.
 
 For a third/fourth player, extra local copies with distinct `--profile` values are sufficient to test capacity. A VM cloned after a previous launch can inherit a saved local GUID; give the clone a new profile. Display names alone do not change identity.
 
 ## Internet and VM alternatives
 
-The bundled Steam transport is the first option for two supported computers on different networks. Sign in with different Steam accounts, add them as friends, launch both Steam scripts and join the host's displayed lobby ID. Steam handles connectivity without configuring a VPN or host port forwarding. Verify this path with the Steam checklist below.
+The bundled Steam transport is the first option for two supported computers on different networks. Sign in with different Steam accounts, add them as friends, and follow the Steam-library invitation procedure below. Steam handles connectivity without configuring a VPN or host port forwarding. Lobby-ID joining is also available.
 
 Direct UTP over the Internet requires reachable host UDP: forward external UDP `7777` to the host's LAN address/port and connect to the public address. Carrier-grade NAT may prevent this. A successful LAN run does not prove this path.
-
-An optional alternative is a private VPN such as Tailscale: put both devices on an authorized private network, allow the game port in the relevant access policy/firewall, and join the host's Tailscale IPv4 address. The game still uses UTP. This tests gameplay over that VPN, not direct public UDP or Steam SDR. Tailscale documents [connecting devices by their assigned address](https://tailscale.com/docs/how-to/connect-to-devices); its [Personal plan](https://tailscale.com/pricing) currently has a free tier.
 
 A Windows VM is a practical additional test environment if its graphics driver can run the player. Configure a bridged/external virtual network for straightforward LAN addresses, and connect the guest to the host's reachable IP, never the guest's `127.0.0.1`. Microsoft documents [Hyper-V virtual switches](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines). NAT networking can also work for a guest connecting out to the host, but the correct host address/routing depends on the hypervisor. Virtual graphics, shared CPU/GPU and the shared network uplink make a VM an incomplete substitute for a physical-device test.
 
@@ -48,7 +46,18 @@ The normal Steam client accesses one account at a time on a computer; opening tw
 
 The simplest setup is two supported physical PCs, with one signed-in Steam account on each. A separate Windows guest with its own Steam installation/account is an alternative isolation arrangement to try; it has not been validated for this build. Steam, the game, graphics acceleration and overlay must all work inside that guest. Run the game and Steam under the same OS user/privilege context, as required for [Steam API initialization](https://partner.steamgames.com/doc/sdk/api).
 
-Use the [Steam checklist](STEAM.md): lobby ID join, friends-only lobby, invitation overlay, private invited join, Join Game, late join, client exit and host loss. Test the Internet scenario from two different networks when possible. A successful Steam session alone does not identify whether Steam used a direct route or relay. One VM sharing the host's uplink does not recreate two independent home NATs.
+### Reviewer invitation flow
+
+1. Extract matching full builds. On each PC choose **Steam → Games → Add a Non-Steam Game to My Library** and add `DockCoop.exe` (Windows) or `DockCoop.app` (Mac). Set shortcut **Launch Options** to `--transport steam` and **Start In** to the folder containing `steam_appid.txt` and the `.exe` or `.app`.
+2. On Mac, approve this app through **System Settings → Privacy & Security → Open Anyway** if Gatekeeper blocks it, close it, then restart it from Steam. Enable Steam Overlay in Steam's settings and the shortcut's properties. Use **Play** in the Steam library on both PCs.
+3. Keep the guest at the game's main menu. The host chooses **Host session**, opens the overlay with **Shift+Tab**, right-clicks the friend and selects **Invite to Game**. Accept the invitation on the guest and confirm both names in the roster.
+4. The host chooses **Start game**. Check controls on both machines using the checklist below. The host presses **Tab/Esc** and chooses **Kick** beside the guest's name; check that the guest returns to the menu.
+
+The game's **Invite Steam friends** button opens Steam's separate invitation dialog, an alternative to the friends-menu route above. For a lobby-ID test, the direct `Steam.cmd` / `Steam.command` launchers are sufficient: host, **Copy lobby ID**, paste it into the guest's **IP address / Steam lobby ID** field, then **Join session**. These launchers do not guarantee overlay activation. See [Steam setup and diagnostics](STEAM.md).
+
+Reported evidence covers Windows Shift+Tab and the invitation button after Steam-library launch, a Steam friends-menu invitation joining Windows and Mac players, and host Kick. The earlier cross-platform run also covered lobby-ID joining and gameplay controls. An independent Mac Shift+Tab/button check, private invited join, the separate Join Game action, and forced-crash recovery over Steam remain separate checks; do not infer them from these results.
+
+Repeat late join, client exit and host loss as applicable. Test the Internet scenario from two different networks when possible. A successful Steam session alone does not identify whether Steam used a direct route or relay. One VM sharing the host's uplink does not recreate two independent home NATs.
 
 A fresh limited Steam account can receive a friend request from the existing account, even when it cannot send requests itself. See [Valve's friends-list guidance](https://help.steampowered.com/en/faqs/view/1902-2D54-E445-59DD).
 

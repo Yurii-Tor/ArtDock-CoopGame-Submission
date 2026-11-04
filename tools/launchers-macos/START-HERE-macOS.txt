@@ -2,19 +2,36 @@ Dock Co-op - macOS Universal (Intel and Apple Silicon)
 
 Requires macOS 12 or newer.
 
-Steam Internet test (compatible with the matching Windows build):
+Recommended review: Steam on Mac + Windows (different networks supported).
 
-1. Extract the whole ZIP; keep the .app and .command files together.
+1. Extract the whole ZIP; keep DockCoop.app, steam_appid.txt and other files together.
 2. Start Steam on both computers and sign in with two different accounts.
    Add the accounts as friends for the default friends-only lobby.
-3. Run Steam.command on Mac and Steam.cmd on Windows.
-4. Choose Host on one computer. Use Copy lobby ID and paste it in the other
-   computer's lobby field and choose Join. No IP address or VPN is needed.
-5. The host presses Start game once both players are in the lobby.
+3. Steam > Games > Add a Non-Steam Game to My Library > Browse.
+   Select DockCoop.app. Finder may display it simply as DockCoop.
+4. In its Steam library Properties set Launch Options to:
+   --transport steam
+   Set Start In to this folder containing DockCoop.app and steam_appid.txt.
+5. Enable Steam Overlay in Steam > Settings > In Game. Launch with Play in
+   the Steam library. On Windows use DockCoop.exe with the same options.
+6. If macOS says Apple cannot check DockCoop, dismiss the message and open
+   System Settings > Privacy & Security. Under Security choose Open Anyway
+   for DockCoop, then confirm Open. This development build is not notarized.
+   If the game opens automatically, close it and launch again from Steam.
+7. One player chooses Host session; the guest stays at the game's main menu.
+   Host: Shift+Tab > right-click friend > Invite to Game.
+   Guest: accept the invitation. Confirm both names in the lobby roster.
+8. The host presses Start game. Test the controls below on both computers.
+9. Host: Tab/Escape > Kick [player name]. The guest should leave while the host
+   stays connected. Rejoin to continue other checks.
 
-Invite Steam friends opens Steam's invitation dialog when its overlay is available.
-If unavailable, use Copy lobby ID as above. These buttons become available once
-connected to a lobby. Steam networking does not require the overlay.
+Invite Steam friends also opens Steam's invitation dialog from inside a lobby.
+Use the Steam library for invitation testing. Steam.command selects Steam
+networking directly but does not guarantee overlay activation.
+
+Alternative: host > Copy lobby ID; guest pastes the numeric ID into
+IP address / Steam lobby ID (replace 127.0.0.1), then Join session.
+This works without the overlay. No VPN, shared LAN or port forwarding is needed.
 
 The bundled steam_appid.txt uses Valve's test AppID 480.
 For local/IP testing without Steam, open DockCoop.app directly or run
@@ -28,10 +45,11 @@ Tab/Escape show session controls and release the cursor.
 Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 The game continues networking while unfocused.
 
-This development build was manually tested with a Windows Steam host and a
-macOS Ventura 13.2.1 client. It is not Developer-ID-notarized. If
-macOS blocks opening it, use System Settings > Privacy & Security > Open Anyway.
-Do not disable Gatekeeper globally. Report the exact error if it still fails.
+Windows/Mac gameplay, rejoin, graceful disconnect, Steam friends-menu
+invitation-to-join and host kick were manually confirmed. The Mac used
+Ventura 13.2.1 and was controlled through RustDesk. A separate Mac-side
+overlay/button check is not claimed. See README.md, docs/STEAM.md and
+docs/VERIFICATION.md for full evidence and remaining checks.
 
 Default log: ~/Library/Logs/Yurii Tor/Dock Co-op/Player.log
 Source and the manual testing checklist:
