@@ -2,49 +2,31 @@
 
 A 2–4 player Unity physics prototype for the ArtDock network developer assignment. The player's host process owns the session and simulates the world. No backend subscription is required.
 
-## Reviewer quick start: Steam on two computers
+**[Download v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1)** — [Windows x64 ZIP](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Windows-v0.1.1.zip) · [macOS Universal ZIP](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-macOS-v0.1.1.zip) · [SHA-256 checksums](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/SHA256SUMS.txt). **Unity is not needed to run these builds.** Extract the whole ZIP and keep its files together. macOS requires version 12 or newer; the app supports Intel and Apple Silicon.
 
-Use the supplied `DockCoop-Windows-Steam-r3.zip` and `DockCoop-macOS-Steam-r3.zip` review builds. The macOS build is Universal (Intel / Apple Silicon), requiring macOS 12 or newer. The older v0.1.0 release predates these cross-platform updates. Unity is not required to run the builds.
+## Quick start: one Windows PC, no Steam
 
-You need two computers, internet access, and **two different Steam accounts added as friends**. Windows and Mac can join across different countries/networks; no VPN, shared LAN, port forwarding or paid backend is required.
+1. Run **`Host-Local.cmd`**, then **`Client-1-Local.cmd`** from the extracted Windows folder. Optionally run **`Client-2-Local.cmd`** for a third player.
+2. Confirm the players appear in the host's roster, then click **Start game** on the host. Each launcher uses a different `--profile`; all connect locally to `127.0.0.1:7777` using Unity Transport (UTP).
+3. Try the controls below. Start another client after the match begins to test late join. Use **Tab / Escape → Leave** to leave a session.
 
-### One-time setup on each computer
+On one Mac, run **`Host-LAN.command`**, then **`Join-LAN.command`** and press **Enter** to accept `127.0.0.1`. These scripts also use separate profiles. For UTP on two computers on one LAN, enter the host's actual LAN address instead; allow the game and UDP port through the host firewall. `127.0.0.1` refers only to the computer running that copy.
 
-1. Extract the entire archive. Keep all files together, including `steam_appid.txt` containing `480` (Valve's test AppID).
-2. Start Steam and sign in. Choose **Games → Add a Non-Steam Game to My Library → Browse**. Select **`DockCoop.exe` on Windows** or **`DockCoop.app` on Mac**.
-3. In the added game's **Properties**, set **Launch Options** to `--transport steam`. Set **Start in** to the extracted folder containing `steam_appid.txt` and the executable/app.
-4. Enable **Steam → Settings → In Game → Enable the Steam Overlay while in-game**. Launch with **Play in the Steam library**, wait a few seconds, and check **Shift+Tab**.
-5. On Mac, if Apple cannot verify DockCoop, dismiss the warning and open **System Settings → Privacy & Security → Open Anyway** for DockCoop, then confirm **Open**. This development app is not Apple-notarized. If it starts automatically, close it and launch again from the Steam library with the options above. This is an exception for this app; global security settings do not need changing. [Apple's instructions](https://support.apple.com/en-gb/102445).
+## Quick start: Steam on two computers
 
-**Launch from the Steam library when testing invitations.** `Steam.cmd` / `Steam.command` select Steam networking, but launching them directly does not guarantee the overlay. In the manual Windows test, launching from the library enabled Shift+Tab and the invitation button. [Steam overlay requirements](https://partner.steamgames.com/doc/features/overlay).
+Use matching builds on Windows/Windows or Windows/macOS, with **two different Steam accounts added as friends**. Different countries and networks are supported; no VPN, shared LAN, port forwarding or paid backend is required. Keep the bundled **`steam_appid.txt` containing `480`** (Valve's test AppID).
 
-### Join, play and moderate
+1. Start Steam and sign in on both computers. Choose **Games → Add a Non-Steam Game to My Library → Browse**, then select **`DockCoop.exe`** on Windows or **`DockCoop.app`** on Mac.
+2. In the added game's **Properties**, set **Launch Options** to `--transport steam` and **Start in** to the extracted folder containing the executable/app and `steam_appid.txt`.
+3. Enable **Steam → Settings → In Game → Enable the Steam Overlay while in-game**. Launch with **Play in the Steam library** and check **Shift+Tab**. On Mac, if Apple cannot verify DockCoop, use **System Settings → Privacy & Security → Open Anyway**, confirm **Open**, then close the game and launch it again from Steam. This development app is not notarized; [Apple describes this per-app approval](https://support.apple.com/en-gb/102445).
+4. One player chooses **Host session**. The other stays in the game's main menu. The host presses **Shift+Tab**, right-clicks the friend and selects **Invite to Game**; the friend accepts. Alternatively, the host chooses **Copy lobby ID** and the guest pastes that numeric ID into the lobby/address field before choosing **Join session**. UDP port validation is only used in UTP mode.
+5. When both names appear in the roster, the host chooses **Start game**. **Tab / Escape** opens the session panel; only the host can **Kick** a player.
 
-1. Launch both games from Steam. One player chooses **Host session**; the other stays in the game's main menu.
-2. The host presses **Shift+Tab**, right-clicks the friend in Steam and selects **Invite to Game**. The friend accepts the invitation. Both players should appear in the host's roster. The in-game **Invite Steam friends** button also opens Steam's invitation dialog. Leave an existing session before accepting another lobby's invitation.
-3. The host chooses **Start game**. Test movement and item interactions using the controls below.
-4. For moderation, the host opens the session panel with **Tab / Escape** and selects **Kick [player name]**. The client should leave the session while the host remains connected.
-5. Check rejoin and disconnect cleanup: rejoin while the host holds a cube; leave as a client while holding a cube (it should fall); leave as host (the session should end for everyone).
+The in-game **Invite Steam friends** button opens Steam's separate invitation dialog. `Steam.cmd` / `Steam.command` select Steam networking directly but do not guarantee an overlay; use the Steam library for invitation testing. Lobby-ID joining works without the overlay. If Steam is unavailable, the menu explains how to start/sign in to Steam or relaunch with `--transport utp`; the game does not silently change transports.
 
-**Alternative join:** the host chooses **Copy lobby ID**. The client pastes the numeric ID into the **IP address / Steam lobby ID** field, replacing `127.0.0.1`, and chooses **Join session**. The port field is not used by Steam. This path works without the overlay, including when using the bundled Steam scripts.
+Two-account Windows/Mac gameplay, rejoin, graceful disconnect, **Invite to Game → successful join**, and kick have tester-reported coverage. Two players roughly 1,000 km apart observed about 100 ms RTT in one Steam session; this is application ping/pong RTT including processing time, with no recorded direct/SDR route. See [Steam setup](docs/STEAM.md), the [manual checklist](docs/MANUAL-TESTING.md) and the [dated verification record](docs/VERIFICATION.md).
 
-Windows/Mac gameplay, rejoin and graceful disconnect were manually verified on 3 November 2026. Steam **Invite to Game → successful join** and host **Kick** were confirmed in the 4 November follow-up. See [the evidence and remaining checks](docs/VERIFICATION.md#steam-library-invitation-and-kick-follow-up--4-november-2026), [Steam details](docs/STEAM.md) and the [manual checklist](docs/MANUAL-TESTING.md).
-
-## Local testing and source builds
-
-For multiple copies on one PC without Steam, use `Host-Local.cmd` and `Client-1-Local.cmd` on Windows. The host clicks **Start game** after the client joins. On Mac, open `DockCoop.app` directly or use `Host-LAN.command` / `Join-LAN.command` for UTP/IP play. Rendering is capped at 60 FPS while focused and 30 FPS in the background; networking continues while unfocused.
-
-Open the source with **Unity 6000.3.21f1 LTS**, open `Assets/Coop/Generated/Menu.unity`, and press Play. Packages are pinned in `Packages/packages-lock.json`. The checked-in scenes and prefabs are ready; `Coop > Generate project assets` regenerates them from the small editor builder. `Coop > Build Windows` creates `Builds/Windows/DockCoop.exe` (development build, useful for diagnostics).
-
-```powershell
-.\DockCoop.exe --host --profile host --name Alice --port 7777
-.\DockCoop.exe --join --profile client1 --name Bob --address 127.0.0.1 --port 7777
-.\DockCoop.exe --join --profile client2 --name Carol --address 127.0.0.1 --port 7777
-```
-
-Without `--host` / `--join`, use the menu. Each `--profile` has a separate persistent local GUID; the same profile deliberately fails duplicate-player approval. In UTP mode on two PCs, use the host's LAN IPv4 address and allow the executable/UDP port through Windows Firewall. Across the public Internet direct UDP requires host port forwarding and a reachable address; Steam mode handles connectivity without that setup. The verification report distinguishes local UTP tests from the manual Internet Steam session.
-
-Steam lobbies are friends-only by default. `--private` creates an invitation-only lobby; `--lobby-name "Test room"` names it. See [Steam setup and verification limits](docs/STEAM.md). The default UTP mode works without Steam or a second Steam account.
+## Controls
 
 | Input | Action |
 |---|---|
@@ -55,7 +37,7 @@ Steam lobbies are friends-only by default. `--private` creates an invitation-onl
 | C | Change replicated character colour |
 | Tab or Escape | Player list, RTT, host kick, leave; toggle cursor |
 
-Host capacity can be set with `--max-players 2`, `3` or `4` (default `4`), for both UTP and Steam lobbies. The host replicates the chosen limit to the UI.
+Host capacity is **2–4**, default **4**; set `--max-players 2`, `3` or `4`. Steam lobbies are friends-only by default; `--private` creates an invitation-only lobby and `--lobby-name "Test room"` names it. Rendering is capped at 60 FPS when focused and 30 FPS in the background; networking continues while unfocused.
 
 ## Architecture
 
@@ -71,41 +53,70 @@ flowchart TD
     Game --> Injected[GameplayServices: can-act, feedback, accepted-throw event]
 ```
 
-Gameplay never imports UTP or Steam. The composition root selects an adapter once, injects services into newly spawned avatars, and wires disconnect cleanup. There is no reflection container or hidden service lookup; the static spawn event is only a composition notification. Session policy and the initial loading barrier are plain C# with executable tests.
+**Netcode for GameObjects (NGO)** manages network object spawning, replicated variables, RPC delivery and network scene synchronization. The chosen transport carries its messages. Our session code adds approval, roster, loading policy and lifecycle; gameplay code adds validated item rules. The host is a **listen server**: the server and its local player run in the same process.
 
-Add a transport by implementing `IConnectionTransport` (including identity validation) and selecting it in `CompositionRoot`. Add a new item by registering its network prefab and extending the host's item creation policy; preserve server simulation and validation. The current prototype intentionally has one item type.
+Gameplay imports NGO but never UTP or Steam. The composition root chooses an adapter once, injects services into newly spawned avatars, and wires disconnect cleanup. There is no reflection container or hidden service lookup; the static spawn event is a local composition notification. Session policy and the initial loading barrier are plain C# with executable tests.
+
+Add a transport by implementing `IConnectionTransport` (including identity validation), supplying an NGO `NetworkTransport`, and selecting it in `CompositionRoot`. Add an item by registering its network prefab and extending the host's creation policy while preserving server simulation and validation. The prototype intentionally has one item type.
 
 ## Network decisions
 
-- **30 Hz NGO tick; 50 Hz host physics.** Transform deltas use 2 cm / 1 degree thresholds, unreliable sequenced updates with NGO recovery, interpolation on replicas, no scale synchronization. Aim pitch is sent at most 10 Hz; roster RTT is refreshed once per second. This is a configuration description, not a measured bandwidth claim.
-- **Owner-authoritative character.** Immediate local movement makes the controller responsive without prediction/reconciliation complexity. Remote motion is interpolated. Cooperative trust is explicit: host item validation uses the host's observed player position, and does not prevent a modified owner from teleporting inside the permitted area.
-- **Host-authoritative items.** Only the host spawns, destroys and simulates bodies. Grab changes NGO ownership to the holder but never moves physics authority off the host. Release returns ownership to the host and applies one authoritative velocity. Clients interpolate; they never independently predict landing.
-- **Validated actions.** RPC sender must own the player, be ready in the active scene, and have a finite in-bounds pose. Host checks distance, line of sight for grab, item existence, free/held state and exact holder. Serial host execution makes a competing grab atomic. Spawn/action limits bound accidental flooding; at most 40 items exist.
-- **Persistent state.** Holder ID, held item ID, colour, roster and scene phase are replicated state, not replay-only RPCs, so late join observes the current result. Items survive creator/holder disconnect; held items are released and fall.
-- **Connection lifecycle.** Approval reserves slots before synchronization and checks protocol version, player count and duplicate identity. UTP GUIDs are identifiers, not authentication; Steam binds identity to its authenticated transport peer. Initial scene participants share a future server-time release after everyone loads. Disconnect removes the participant from the barrier. Late joiners synchronize independently, without pausing incumbents. Loading/connection timeouts and host loss return an explanatory menu; no host migration.
-- **Stats.** The host acknowledges an accepted throw only to its owner. That local account records the event through `IGameStats`; the provided logging adapter batches `Flush` on leave/quit, avoiding accidental attribution of every player's throw to the host. No real Spacewar achievements are written.
+- **30 Hz NGO tick; 50 Hz host physics.** Transform deltas use 2 cm / 1 degree thresholds, unreliable sequenced updates with NGO recovery, interpolation on replicas, and no scale synchronization. Aim pitch is sent at most 10 Hz; roster RTT is refreshed once per second. These are configured rates, not measured bandwidth.
+- **Owner-authoritative characters.** Immediate local movement keeps control responsive without prediction/reconciliation complexity. Other peers interpolate it. This cooperative prototype trusts movement: item checks use the host's observed player pose and do not stop a modified owner teleporting within the permitted area.
+- **Host-authoritative items.** Only the host spawns, destroys and simulates bodies. On grab it separately writes `PhysicsItem.Holder` and `PlayerAvatar.HeldItem`, then calls `NetworkObject.ChangeOwnership`. On release it clears those fields and calls `RemoveOwnership`. Ownership identifies the holder; physics authority remains on the host. A throw applies one host-computed velocity; clients interpolate the result.
+- **Validated actions.** The RPC sender must own the player, be ready in the active scene, and have a finite, bounded pose. The host checks reach, line of sight for grab, item existence and exact holder. Sequential host execution allows only the first competing grab to observe a free item. The two replicated fields are a server invariant; their network delivery is not atomic. Request limits bound accidental flooding and at most 40 items exist.
+- **Persistent state.** Holder, held item, colour, roster and scene phase are replicated state, so late join observes their current values. Items survive a holder disconnect; a held item is released and falls.
+- **Connection lifecycle.** Approval reserves slots before synchronization and checks protocol version, capacity and duplicate identity. UTP GUIDs are identifiers; Steam also binds identity to its authenticated peer. Initial players share a future server-time release after everyone loads. Disconnect removes the player from the barrier. Late joiners synchronize independently without pausing incumbents. Timeouts and host loss return an explanatory menu. The arena may remain behind that menu; a new Host/Join is available.
+- **Stats.** After accepting a throw, the host acknowledges only its actor. That client records the event through `IGameStats`; the logging adapter batches `Flush` on leave/quit. No real Spacewar statistics or achievements are written.
 
-See [gameplay detail](docs/GAMEPLAY.md) and [decisions](docs/DECISIONS.md).
+See [gameplay details](docs/GAMEPLAY.md) and [decisions](docs/DECISIONS.md). The embedded Unity Transport 2.7.4 has a documented one-line failed-receive buffer leak fix that prevents forcibly closed Windows clients exhausting the host's receive pool: [patch provenance](Packages/com.unity.transport/UPSTREAM-PATCH.md), [debugging evidence](docs/NETWORK-DEBUGGING.md).
 
-**Windows transport fix:** the embedded Unity Transport 2.7.4 includes a one-line backport for an upstream-confirmed failed-receive buffer leak. Without it, forcibly closing a client on Windows could exhaust the host's UDP receive pool and disconnect survivors. [Patch provenance](Packages/com.unity.transport/UPSTREAM-PATCH.md) and [debugging evidence](docs/NETWORK-DEBUGGING.md) explain the change. It requires no firewall workaround.
+## Build and verify from source
 
-## Verification and limitations
+Use **Unity 6000.3.21f1 LTS**. Open `Assets/Coop/Generated/Menu.unity` and press Play. Packages are pinned in `Packages/packages-lock.json`; scenes and prefabs are checked in. `Coop > Generate project assets` regenerates them from the editor builder.
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File tools/build.ps1
 dotnet run --project tools/tests/SessionPolicy.Tests.csproj
 powershell -ExecutionPolicy Bypass -File tools/verify-approval.ps1
-python tools/udp_proxy.py --listen 7778 --target 7777 --delay-ms 75 --jitter-ms 15 --loss .03
-# One client joins port 7778 through this proxy; host stays on 7777.
+powershell -ExecutionPolicy Bypass -File tools/verify-gameplay.ps1
+powershell -ExecutionPolicy Bypass -File tools/verify-host-crash.ps1
+powershell -ExecutionPolicy Bypass -File tools/verify-loading-disconnect.ps1
+# With Steam running and signed in:
+powershell -ExecutionPolicy Bypass -File tools/verify-ui.ps1 -SteamAvailable
+# With Steam closed, omit -SteamAvailable to check its unavailable message.
 ```
 
-Use a separate proxy port/process for each impaired client. Base added RTT is 150 ms, with jitter and 3% loss in each direction. Unity's deprecated `SetDebugSimulatorParameters` is intentionally not used: it has no effect in this package version. The `--smoke` harness drives normal public gameplay requests for build tests; see [verification evidence](docs/VERIFICATION.md) for executed cases and pending manual checks.
+The gameplay harness uses separate processes and UDP proxies with 150 ms base added RTT, +/-15 ms jitter per direction and 3% loss per direction. The host-crash probe force-terminates its own host PID after the client reaches gameplay. See [verification evidence](docs/VERIFICATION.md) for actual results and the distinction between model state, rendered UI and manual checks.
 
-Known scope: one arena/item, no persistence across host restarts, no host migration, no competitive anti-cheat or client prediction, no bandwidth measurements yet. Windows/Mac Steam gameplay, invitation-based joining and kick have tester-reported manual coverage. Private-lobby access, the separate Steam **Join Game** action, the selected direct/SDR route and forced process termination over Steam remain unverified; the automated crash tests use UTP. A Windows VM is an unverified alternative to the tested two-computer setup. Exact simultaneous screen changes cannot be guaranteed under arbitrary latency; all initial clients target the same synchronized server timestamp with a 750 ms lead.
+For macOS, install **Mac Build Support (Mono)** for the pinned editor, run `tools/build-macos.ps1`, then `python tools/package-macos.py`. Packaging preserves Unix executable permissions. Both release ZIPs include the game, Steam native libraries, launchers, documentation and `BUILD-INFO.txt` with the exact source SHA and Unity version.
 
-## Delivery
+UTP command-line equivalents for three local copies:
 
-Repository history contains implementation and verification commits. Windows archive and demonstration video are local deliverables listed in the verification report. Work was AI-assisted; elapsed implementation/verification time is recorded there; pending manual testing is additional.
+```powershell
+.\DockCoop.exe --host --profile host --name Alice --port 7777
+.\DockCoop.exe --join --profile client1 --name Bob --address 127.0.0.1 --port 7777
+.\DockCoop.exe --join --profile client2 --name Carol --address 127.0.0.1 --port 7777
+```
 
-To reproduce the macOS build from Windows, install **Mac Build Support (Mono)** for the pinned Unity editor, run `powershell -ExecutionPolicy Bypass -File tools/build-macos.ps1`, then `python tools/package-macos.py`. The packaging script preserves Unix executable permissions in `Artifacts/DockCoop-macOS.zip`. This is a development build without Developer ID notarization.
+Each `--profile` has a separate persistent GUID; duplicate profiles deliberately fail approval. Direct UTP across the Internet requires a reachable host UDP address and may require port forwarding. Steam handles Internet connectivity without that setup.
 
-Third-party code is limited to Unity networking/input/UI packages and the allowed [community Facepunch transport](https://github.com/Unity-Technologies/multiplayer-community-contributions/tree/main/Transports/com.community.netcode.transport.facepunch). Its pinned source, local patches and licenses are in [UPSTREAM.md](Packages/com.community.netcode.transport.facepunch/UPSTREAM.md). No multiplayer sample/template is used as the project foundation.
+## Known limitations and next steps
+
+- **Unmeasured network behavior:** the selected Steam direct/SDR route, jitter/loss over repeated runs and traffic volume have not been captured. Record networking diagnostics and a bandwidth profile before deciding whether a regional relay would improve the observed ~100 ms RTT experience.
+- **Remaining verification:** direct UTP between two physical computers, private-lobby permissions, Steam's separate **Join Game** action, an independent Mac overlay/button check, and a forced host crash with a known Steam build/transport remain unverified. The tester's additional forced-host-close report did not identify transport, build SHA or the displayed reason. Detailed per-control coverage and visual quality under varied connections also remain incomplete. [The verification record](docs/VERIFICATION.md) separates these gaps from implemented behavior.
+- **Prototype scope:** one arena/item, no persisted match across restarts, no competitive movement anti-cheat, no client physics prediction, and no Apple notarization. Local UTP and remote Steam play are implemented.
+
+Possible development after this assignment:
+
+1. Measure selected routes, jitter, loss and traffic across repeated runs before considering a regional relay.
+2. The match ends when the listen server leaves, as required. Host migration would need a recoverable snapshot, successor selection and restoration of players and held items when clients reconnect.
+3. If interaction rules grow, extract server-side validation and item mutations into a module testable outside Unity; RPC handlers would delegate to it.
+
+## Delivery status
+
+The [release](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1) is the runnable delivery; v0.1.0 remains available as a historical prerelease. The [available video](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4) covers scripted UTP gameplay, not the complete requested Steam demonstration. [Verification and video coverage](docs/VERIFICATION.md) list the remaining footage and checks.
+
+Work was AI-assisted. The author estimates **4 hours for implementation and review**, plus **2–3 hours for manual testing and network troubleshooting**, about **6–7 person-hours overall**. The historical 1.5-hour initial-stage figure in the verification record is included in that estimate, not an additional total.
+
+Third-party code is limited to Unity networking/input/UI packages and the allowed [community Facepunch transport](https://github.com/Unity-Technologies/multiplayer-community-contributions/tree/main/Transports/com.community.netcode.transport.facepunch). Pinned source, local changes and licenses are recorded in [UPSTREAM.md](Packages/com.community.netcode.transport.facepunch/UPSTREAM.md). No multiplayer sample/template is the project foundation.

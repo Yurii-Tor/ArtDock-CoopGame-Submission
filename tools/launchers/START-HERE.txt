@@ -1,8 +1,15 @@
-DOCK CO-OP - Windows review build
+DOCK CO-OP v0.1.1 - Windows x64
 
 Extract the whole archive. Keep the executable, data directory and DLLs together.
+No Unity installation is required. BUILD-INFO.txt records the source SHA.
 
-Recommended review: Steam on Windows + Windows or Windows + Mac.
+QUICK LOCAL TEST - one PC, no Steam:
+Run Host-Local.cmd and Client-1-Local.cmd (optionally Client-2-Local.cmd).
+Each uses a different --profile and local UTP at 127.0.0.1:7777.
+Confirm the players in the lobby, then click Start game on the host.
+Start another client during gameplay for late join.
+
+STEAM TEST - Windows + Windows or Windows + Mac:
 Use two computers and two different Steam accounts added as friends.
 
 1. Steam > Games > Add a Non-Steam Game to My Library > Browse.
@@ -26,15 +33,14 @@ Steam networking but does not guarantee overlay activation.
 
 Alternative: host > Copy lobby ID; guest pastes the numeric ID into
 IP address / Steam lobby ID (replace 127.0.0.1), then Join session.
-This works without the overlay. The UDP port field is not used in Steam mode.
+This works without the overlay. Steam mode hides the unused UDP port field.
 No VPN, port forwarding or shared LAN is needed. Keep steam_appid.txt (480).
+If Steam is unavailable, the menu explains how to start/sign in to Steam or
+restart with --transport utp. There is no automatic transport switch.
 
 WASD move; mouse look; Space jump; F spawn; E grab/drop;
 right mouse throw; X delete held item; C colour; Tab/Escape menu and player list.
 
-Local test on one PC without Steam:
-Run Host-Local.cmd and Client-1-Local.cmd (optionally Client-2-Local.cmd),
-then Start game on the host. Start another client during gameplay for late join.
 For UTP on two PCs on one LAN, run DockCoop.exe directly, use the host's actual
 LAN address and UDP port 7777, and allow the game through Windows Firewall.
 
@@ -46,3 +52,5 @@ Rendering is capped at 60 FPS when focused and 30 FPS in the background.
 
 Source, technical README and verification details:
 https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission
+Release and SHA-256 checksums:
+https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1

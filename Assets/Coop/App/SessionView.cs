@@ -20,6 +20,7 @@ namespace Coop.App
         Button host, join, start, leave, invite, copyLobby;
         string inviteNotice = "";
         string inviteLobbyId = "";
+        string connectionNotice = "";
         Transform kickRows;
         float refreshAt;
         bool shown = true;
@@ -28,6 +29,8 @@ namespace Coop.App
         public void Initialize(CompositionRoot composition)
         {
             root = composition;
+            connectionNotice = root.StartupNotice;
+            root.Session.Changed += SessionChanged;
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             var canvasGo = new GameObject("Session UI", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasGo.transform.SetParent(transform);
@@ -63,7 +66,8 @@ namespace Coop.App
             cl.childForceExpandWidth = true;
             nameInput = Input(connectionPanel.transform, "Display name", root.Options.Get("name", "Player"));
             addressInput = Input(connectionPanel.transform, "IP address / Steam lobby ID", root.Options.Get("address", "127.0.0.1"));
-            portInput = Input(connectionPanel.transform, "UDP port", root.Options.Get("port", "7777"));
+            if (!(root.Transport is Coop.Steam.SteamConnectionTransport))
+                portInput = Input(connectionPanel.transform, "UDP port", root.Options.Get("port", "7777"));
             host = Button(connectionPanel.transform, "Host session", () => Connect(true));
             join = Button(connectionPanel.transform, "Join session", () => Connect(false));
             if (root.Transport is Coop.Steam.SteamConnectionTransport steam)
@@ -90,7 +94,7 @@ namespace Coop.App
             }
             start = Button(panel.transform, "Start game", () => root.Session.StartGame());
             leave = Button(panel.transform, "Leave session", () => root.Session.Leave());
-            status = Label(panel.transform, "Ready", 15, 54);
+            status = Label(panel.transform, connectionNotice, 15, 54);
             roster = Label(panel.transform, "", 16, 112);
             kickRows = new GameObject("Host moderation", typeof(RectTransform), typeof(VerticalLayoutGroup)).transform;
             kickRows.SetParent(panel.transform, false);
@@ -121,11 +125,15 @@ namespace Coop.App
         void AutoJoin() => Connect(false);
         void Connect(bool isHost)
         {
-            if (!ushort.TryParse(portInput.text, out var port) || port == 0)
+            // Steam uses lobby IDs; preserve the shared session contract with an ignored port.
+            ushort port = 7777;
+            if (portInput != null && (!ushort.TryParse(portInput.text, out port) || port == 0))
             {
-                status.text = "Enter a port from 1 to 65535.";
+                connectionNotice = "Enter a port from 1 to 65535.";
+                status.text = connectionNotice;
                 return;
             }
+            connectionNotice = "";
             if (isHost)
                 root.Session.Host(addressInput.text, port, nameInput.text);
             else
@@ -154,7 +162,13 @@ namespace Coop.App
             host.interactable = join.interactable = !network.IsListening && !session.IsBusy;
             start.gameObject.SetActive(network.IsHost && session.State != null && !playing);
             leave.gameObject.SetActive(network.IsListening || session.IsBusy);
-            status.text = session.Status + (session.State != null ? "\n" + session.State.Phase.Value : "") + (root.Transport is Coop.Steam.SteamConnectionTransport steam ? "\nLobby: " + steam.LobbyId : "");
+            status.text = string.IsNullOrEmpty(connectionNotice) ? session.Status : connectionNotice;
+            if (session.State != null)
+                status.text += "\n" + session.State.Phase.Value;
+            if (root.Transport is Coop.Steam.SteamConnectionTransport steam && !string.IsNullOrEmpty(steam.LobbyId))
+                status.text += "\nLobby: " + steam.LobbyId;
+            // Initialization and connection errors can wrap beyond the normal status height.
+            status.GetComponent<LayoutElement>().preferredHeight = Mathf.Max(54, status.preferredHeight + 4);
             if (root.Transport is Coop.Steam.SteamConnectionTransport steamInvites)
             {
                 var lobbyId = steamInvites.LobbyId;
@@ -186,6 +200,12 @@ namespace Coop.App
                         var id = p.ClientId;
                         Button(kickRows, "Kick " + p.Name, () => session.Kick(id));
                     }
+        }
+        void SessionChanged() => connectionNotice = "";
+        void OnDestroy()
+        {
+            if (root != null && root.Session != null)
+                root.Session.Changed -= SessionChanged;
         }
         Text Label(Transform parent, string value, int size, float height)
         {

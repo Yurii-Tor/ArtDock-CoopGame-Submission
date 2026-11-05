@@ -28,6 +28,7 @@ namespace Coop.App
             get; private set;
         }
         public string Notice { get; private set; } = "";
+        public string StartupNotice { get; private set; } = "";
         GameplayServices gameplay;
         IGameStats stats;
         bool frameRateInitialized;
@@ -61,7 +62,7 @@ namespace Coop.App
                 Transport = steam;
                 identity = steam;
                 if (!steam.TryInitialize(out var error))
-                    Notice = error;
+                    StartupNotice = error;
                 steam.InviteJoinRequested += lobbyId => Session.Join(lobbyId, 7777, "");
                 steam.SessionEnded += reason => Session.Leave(reason);
             }
@@ -75,6 +76,8 @@ namespace Coop.App
             Session.PlayerDisconnected += PhysicsItem.DropForPlayer;
             SceneManager.sceneLoaded += SceneLoaded;
             gameObject.AddComponent<SessionView>().Initialize(this);
+            if (Options.Has("ui-probe"))
+                gameObject.AddComponent<UiProbe>().Initialize(this);
             if (Options.Has("smoke"))
                 gameObject.AddComponent<SmokeDriver>().Initialize(this);
             if (Options.Has("race"))

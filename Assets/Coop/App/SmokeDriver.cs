@@ -1,7 +1,9 @@
 using System.Collections;
 using Coop.Gameplay;
 using Coop.Session;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Coop.App
 {
@@ -49,12 +51,34 @@ namespace Coop.App
                 yield break;
             }
             Debug.Log("SMOKE_CONNECTED " + root.Network.LocalClientId);
+            if (root.Options.Has("hold-loading"))
+            {
+                root.Network.SceneManager.OnSceneEvent += HoldSceneActivation;
+                while (Time.realtimeSinceStartup < deadline)
+                    yield return null;
+                root.Network.SceneManager.OnSceneEvent -= HoldSceneActivation;
+                Debug.LogError("SMOKE_FAIL loading client was not terminated by harness");
+                Application.Quit(12);
+                yield break;
+            }
             if (root.Network.IsHost)
             {
                 while (root.Session.State.Players.Count < root.Options.Number("wait-players", 2) && Time.realtimeSinceStartup < deadline)
                     yield return null;
                 yield return new WaitForSecondsRealtime(2);
                 root.Session.StartGame();
+                if (root.Options.Has("expect-loading-disconnect"))
+                {
+                    while (Time.realtimeSinceStartup < deadline && !TwoReadyWithOnePending())
+                        yield return null;
+                    if (!TwoReadyWithOnePending())
+                    {
+                        Debug.LogError("SMOKE_FAIL initial loading barrier did not wait for the held client");
+                        Application.Quit(13);
+                        yield break;
+                    }
+                    Debug.Log("SMOKE_LOADING_BARRIER_WAITING players=3 ready=2 playing=false");
+                }
             }
             while (!root.Session.LocalCanPlay && Time.realtimeSinceStartup < deadline)
                 yield return null;
@@ -65,6 +89,23 @@ namespace Coop.App
                 yield break;
             }
             Debug.Log("SMOKE_PLAYING players=" + root.Session.State.Players.Count);
+            if (root.Options.Has("expect-loading-disconnect"))
+            {
+                if (root.Session.State.Players.Count != 2)
+                {
+                    Debug.LogError("SMOKE_FAIL loading disconnect did not remove the departed player");
+                    Application.Quit(14);
+                    yield break;
+                }
+                Debug.Log("SMOKE_LOADING_DISCONNECT_PASS players=2");
+                yield return new WaitForSecondsRealtime(15);
+                yield break;
+            }
+            if (root.Options.Has("expect-host-crash"))
+            {
+                yield return VerifyHostCrash();
+                yield break;
+            }
             foreach (var existing in FindObjectsByType<PhysicsItem>(FindObjectsSortMode.None))
                 Debug.Log($"SMOKE_SNAPSHOT item={existing.NetworkObjectId} holder={existing.Holder.Value} owner={existing.OwnerClientId}");
             if (root.Options.Has("expect-held"))
@@ -168,6 +209,84 @@ namespace Coop.App
                 yield break;
             }
             Debug.Log("SMOKE_PASS");
+            root.Session.Leave();
+            yield return new WaitForSecondsRealtime(1);
+            Application.Quit();
+        }
+
+        // Hold only this opt-in client's real scene activation, so the external harness can
+        // terminate it while the host is demonstrably waiting at the initial load barrier.
+        void HoldSceneActivation(SceneEvent sceneEvent)
+        {
+            if (sceneEvent.SceneEventType != SceneEventType.Load || sceneEvent.SceneName != "Arena" ||
+                sceneEvent.AsyncOperation == null)
+                return;
+            sceneEvent.AsyncOperation.allowSceneActivation = false;
+            Debug.Log("SMOKE_LOADING_HELD scene=Arena activation=false");
+        }
+
+        bool TwoReadyWithOnePending()
+        {
+            var state = root.Session.State;
+            if (!state || state.Phase.Value != SessionPhase.Loading || state.Players.Count != 3 || root.Session.LocalCanPlay)
+                return false;
+            int ready = 0;
+            foreach (var player in state.Players)
+                if (player.Ready)
+                    ready++;
+            return ready == 2;
+        }
+
+        IEnumerator VerifyHostCrash()
+        {
+            float deadline = Time.realtimeSinceStartup + 30;
+            while ((root.Network.IsListening || root.Network.ShutdownInProgress || root.Session.IsBusy ||
+                root.Session.State != null || root.Session.LocalCanPlay) && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            const string reason = "Connection lost or host left the session.";
+            if (root.Network.IsListening || root.Network.ShutdownInProgress || root.Session.IsBusy ||
+                root.Session.State != null || root.Session.LocalCanPlay || root.Session.Status != reason)
+            {
+                Debug.LogError("SMOKE_FAIL host crash model cleanup: " + root.Session.Status);
+                Application.Quit(15);
+                yield break;
+            }
+            Debug.Log("SMOKE_HOST_CRASH_MODEL_PASS " + root.Session.Status);
+            // Wait through several normal view refreshes before checking the actual UI objects.
+            yield return new WaitForSecondsRealtime(2);
+            Button hostButton = null;
+            Button joinButton = null;
+            var view = root.GetComponent<SessionView>();
+            foreach (var button in view.GetComponentsInChildren<Button>(true))
+            {
+                if (button.name == "Host session") hostButton = button;
+                if (button.name == "Join session") joinButton = button;
+            }
+            bool reasonActive = false;
+            foreach (var text in view.GetComponentsInChildren<Text>(true))
+                reasonActive |= text.isActiveAndEnabled && text.text.Contains(reason);
+            if (root.Session.Status != reason || !reasonActive || !hostButton || !joinButton ||
+                !hostButton.isActiveAndEnabled || !joinButton.isActiveAndEnabled ||
+                !hostButton.interactable || !joinButton.interactable)
+            {
+                Debug.LogError("SMOKE_FAIL host crash menu state or reason");
+                Application.Quit(16);
+                yield break;
+            }
+            Debug.Log("SMOKE_HOST_CRASH_UI_STATE_PASS activeMenu=true hostEnabled=true joinEnabled=true reason=" + reason);
+            // Exercising the real menu button verifies a new connection can be started in this process.
+            hostButton.onClick.Invoke();
+            deadline = Time.realtimeSinceStartup + 15;
+            while ((!root.Network.IsHost || !root.Session.State || root.Session.State.Players.Count != 1) &&
+                Time.realtimeSinceStartup < deadline)
+                yield return null;
+            if (!root.Network.IsHost || !root.Session.State || root.Session.State.Players.Count != 1)
+            {
+                Debug.LogError("SMOKE_FAIL host crash menu could not start a fresh host: " + root.Session.Status);
+                Application.Quit(17);
+                yield break;
+            }
+            Debug.Log("SMOKE_HOST_CRASH_REHOST_PASS players=1");
             root.Session.Leave();
             yield return new WaitForSecondsRealtime(1);
             Application.Quit();
