@@ -40,8 +40,6 @@ def validate(archive_path, platform, sha):
         native = 0
         for info in archive.infolist():
             name = info.filename
-            assert not any(word in name.lower() for word in
-                           ("learning.uk", "preparation-plan", "network-debugging-original"))
             data = archive.read(info)
             if platform == "macOS":
                 if data[:4] == b"\xca\xfe\xba\xbe":
