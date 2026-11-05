@@ -12,7 +12,7 @@
 | Item position and rotation | Host | Standard server-authoritative `NetworkTransform` |
 | Item physics | Host | Clients render transforms; their bodies are kinematic |
 
-Ownership is the identity associated with a network object. Authority determines who can write a particular state. They are separate concepts. An item is owned by its holder to meet the ownership requirement, while its transform and physics remain server authoritative. Ownership returns to the server when released.
+Ownership is the identity associated with a network object. Authority determines who can write a particular state. They are separate concepts. An item is owned by its holder to meet the ownership requirement, while its transform and physics remain server authoritative. The host separately writes `PhysicsItem.Holder` and `PlayerAvatar.HeldItem`, then calls `NetworkObject.ChangeOwnership(holderClientId)`. On release it clears both values and calls `NetworkObject.RemoveOwnership()` to return ownership to the server.
 
 ## Input and dependency injection
 

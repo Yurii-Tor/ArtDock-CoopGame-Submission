@@ -1,8 +1,48 @@
 # Verification record
 
+## v0.1.1 release verification — 5 November 2026
+
+Runnable artifacts are published with [v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1): `DockCoop-Windows-v0.1.1.zip`, `DockCoop-macOS-v0.1.1.zip`, `DockCoop-Demo-v0.1.1.mp4` and `SHA256SUMS.txt`. The ZIPs include platform launchers, documentation, Steam AppID 480 and `BUILD-INFO.txt`; the latter records the exact source commit and Unity version. The macOS build is Universal, requires macOS 12+, and is not notarized. No Unity installation is needed to play.
+
+This release fixes menu validation and feedback: Steam does not validate an unused UDP port, UTP still requires 1–65535, invalid input survives UI refresh, and unavailable Steam initialization is explained on the first menu. Historical r2/r3 results below are not relabelled as tests of the new binaries.
+
+| Release check | Result / evidence |
+|---|---|
+| Policy tests | PASS, all 32; `dotnet run --project tools/tests/SessionPolicy.Tests.csproj` |
+| Fresh Windows and Universal macOS candidate builds | PASS; `COOP_BUILD_OK 158554696`, `COOP_MAC_BUILD_OK 317957132`; no C# compiler errors or warnings |
+| UTP approval | PASS; `Artifacts/approval-20261105-205945/` |
+| Impaired UTP gameplay | PASS; `Artifacts/gameplay-20261105-210058/`, `GAMEPLAY_SUITE_PASS`; added ~150 ms RTT and 3% loss each direction, held-item late join, forcibly killed holder, fresh join and graceful host leave |
+| Forced host-process crash: model and reusable menu state | PASS; `Artifacts/host-crash-20261105-205946/`, `HOST_CRASH_SUITE_PASS`; its own host PID is killed after the client reaches Playing; model and UI state report **Connection lost or host left the session.**, Host/Join are enabled and same-process rehost passes |
+| Forced host-process crash: rendered feedback | PASS; inspected `Artifacts/host-crash-20261105-205946/frames-client/frame-00080.png`: the return menu shows the readable host-loss message and Host/Join controls. This is separate visual evidence from the controller log |
+| Client disconnect during scene loading | PASS; `Artifacts/loading-disconnect-20261105-210027/`, `LOADING_DISCONNECT_SUITE_PASS`; a test-only gate holds one client's loading completion, the host remains Loading with 2/3 ready, then force-killing that client lets the two survivors reach Playing |
+| Menu validation with Steam running | PASS; `Artifacts/ui-20261105-210134/`, `UI_SUITE_PASS`; UTP invalid-port feedback persists and corrected input hosts; Steam rejects a nonnumeric lobby ID and can host despite `--port garbage` |
+| Startup with Steam closed | PASS; `Artifacts/ui-20261105-210235/`, `UI_SUITE_PASS`; UTP hosts normally without Steam, and Steam mode shows its unavailable message on the first menu |
+| Rendered validation/startup messages | PASS; inspected `frames-steam-unavailable/frame-00007.png` in the closed-Steam run: full action message is readable and the port field is absent; `frames-utp-port/frame-00020.png` in the earlier UI run shows the invalid-port message |
+
+These runs validate the release candidate before integration. The published ZIPs are rebuilt from the final clean `main` commit recorded in their `BUILD-INFO.txt`. Final archive/download checks and smoke results are recorded in the [release notes](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1), so publication evidence can be added without changing the tagged source.
+
+Reproduce the new probes with `tools/verify-host-crash.ps1 -Capture`, `tools/verify-loading-disconnect.ps1` and `tools/verify-ui.ps1 -SteamAvailable -Capture`. Run `tools/verify-ui.ps1 -Capture` with Steam closed for unavailable-Steam startup and normal UTP startup. The scripts use separate profiles, bounded timeouts and clean up only the processes they create. The loading gate is enabled only by the test flags; it is a real three-process disconnect/barrier test, not an observation of a naturally slow disk load.
+
+### Additional tester reports recorded for this release
+
+- **Forced host-process termination:** Yurii reports using PowerShell `Stop-Process -Id <hostPid> -Force`; the client returned to the lobby search/join screen. This is tester-reported. The transport, executable SHA and visible reason were not supplied. The numeric example `1234` is not a reusable PID. This report does not establish a known-build Steam crash test or the wording/visibility of its disconnect reason.
+- **Remote Steam RTT:** two players roughly 1,000 km apart observed about 100 ms RTT in one separate manual Steam session. The transport uses application ping/pong, including callback scheduling/processing time. No selected direct/SDR route, jitter series, packet-loss measurement or bandwidth profile was captured.
+- The earlier Tailscale attempt was an incomplete private-IP test for UTP: the selected package did not work on Ventura 13.2.1; Dock Co-op itself subsequently worked on that Mac through Steam.
+
+### Remaining verification and delivery scope
+
+- Direct UTP between two physical computers over LAN/public IP remains separate from the verified remote Steam path and local multi-process UTP tests.
+- Steam private-lobby permissions, the separate **Join Game** action, an independent Mac Shift+Tab/button check, and forced host termination with a recorded Steam transport/build/reason remain unverified. AppID 480 does not permit configuring this project's localized Rich Presence display.
+- A detailed per-control matrix for both roles, physical input directly at the Mac, subjective smoothness under varied connections, route diagnostics and bandwidth profiling remain incomplete. The reported Mac session used RustDesk.
+- The available [demo video](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4) is an automated UTP recording with host and late-client views, accelerated capture and no audio. It does not cover Steam account/lobby/invitation UI. A complete assignment video still needs a Steam setup/join segment with two accounts, visible player list/RTT and kick, plus clear views of the requested 2–3 participants, late join, grab/throw, client departure and host departure. The existing automated footage must be identified as scripted rather than a manual session.
+
+**Effort:** the author's approximate estimate is **4 hours for implementation and review**, plus **2–3 hours for manual testing and network troubleshooting**, about **6–7 person-hours in total**. This is a self-reported estimate, not a calculation from commit timestamps. The historical 1.5-hour figure below covered only the initial implementation/debugging/automated-checking stage and is not added again to the total.
+
+## Historical baseline — 2 November 2026
+
 Baseline date: 2 November 2026. Windows x64, Unity 6000.3.21f1, NGO 2.7.0, embedded Unity Transport 2.7.4 with the documented failed-receive buffer fix. The baseline tests use separate real player processes on one Windows PC. Later platform updates and the actual two-computer Steam session are recorded in the dated sections below.
 
-## Executed
+### Executed
 
 | Check | Result / evidence |
 |---|---|
@@ -25,14 +65,14 @@ The final combined crash/latency/late-join run is `Artifacts/gameplay-20261102-1
 
 Run the build with `--race` on one host and one client for the contested-item probe. Use `--lifecycle host` / `--lifecycle client` alongside `--host` / `--join` for the reconnect/rehost probe. Always give processes different `--profile` values and use an unused port.
 
-## Delivery artifacts
+### Historical delivery artifacts
 
 - `Artifacts/DockCoop-Windows.zip`: complete runnable development build, launcher scripts, native Steam dependency and AppID480 file. The optional Burst debug-only directory is excluded.
 - `Artifacts/DockCoop-Demo.mp4`: actual host and late-join render captures, encoded in two labelled segments. Automated actions, accelerated capture, no audio, no Steam footage. It is evidence of the scripted test, not a manual play-session recording.
 - `Artifacts/SHA256SUMS.txt`: checksums for the archive and video.
-- GitHub prerelease assets provide the same files. The repository is private; reviewers need access.
+- The v0.1.0 GitHub prerelease contains the original Windows delivery. Current downloads are linked in the v0.1.1 section above.
 
-## Remaining manual verification
+### Gaps at the baseline stage
 
 - Direct UTP between two physical computers over LAN/public IP. The separate Internet Steam path was verified below.
 - Private-lobby access, the separate Steam **Join Game** action, Steam-unavailable startup, forced process termination over Steam, and identifying the actual direct/SDR route. Windows overlay/button use, cross-platform **Invite to Game** joining and host kick were subsequently confirmed in the 4 November follow-up below. AppID480 does not permit configuring this project's localized Rich Presence display.
@@ -40,7 +80,7 @@ Run the build with `--race` on one host and one client for the contested-item pr
 - Forced process termination precisely during scene loading. The disconnect-unblocks-barrier policy is tested; the tiny scene transition was not deterministically interrupted in the process tests.
 - Bandwidth profiling and subjective movement smoothness under varied network conditions. The configured rates/thresholds are documented, not presented as measured bandwidth.
 
-Approximate AI-assisted implementation, debugging and automated verification time: 1.5 hours. The pending manual/two-PC/Steam checks are additional and not included.
+Approximate AI-assisted initial implementation, debugging and automated verification time: 1.5 hours. This historical partial figure excludes later platform work, manual checks and release preparation.
 
 ## macOS build follow-up — 3 November 2026
 
@@ -125,4 +165,4 @@ The tester reported that Windows Shift+Tab and the invitation button did not ope
 
 These results extend the earlier two-account Windows/Mac gameplay checks. They confirm an invitation-based join and kick, not just that an invitation API was called. The report does not separately establish opening Shift+Tab/the invitation button on Mac, the **Join Game** action, private-lobby permissions, the chosen direct/SDR route, or a forced Steam host-process crash.
 
-The supplied r3 executables were built from `feca9e1deb183411c0f9db8597304501a050a451`. This follow-up updates instructions and evidence without rebuilding game code; each archive's `BUILD-INFO.txt` distinguishes executable source from documentation revision. Follow [README](../README.md#reviewer-quick-start-steam-on-two-computers) or [STEAM.md](STEAM.md) to reproduce the tested library-launch and invitation flow.
+The supplied r3 executables were built from `feca9e1deb183411c0f9db8597304501a050a451`. This historical follow-up updated instructions and evidence without rebuilding game code; those archives' `BUILD-INFO.txt` distinguishes executable source from documentation revision. Current release binaries have their own source SHA. Follow [README](../README.md#quick-start-steam-on-two-computers) or [STEAM.md](STEAM.md) to reproduce the tested library-launch and invitation flow.
