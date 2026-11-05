@@ -45,7 +45,7 @@ try {
     Wait-Marker $hostPlayer 'SMOKE_LOADING_BARRIER_WAITING'
     if ($heldClient.Process.HasExited) { throw 'Loading client exited before the controlled crash.' }
     "FORCE_LOADING_CLIENT pid=$($heldClient.Process.Id) hostPid=$($hostPlayer.Process.Id) transport=utp phase=Loading ready=2/3" |
-        Set-Content -LiteralPath (Join-Path $logRoot 'harness.log')
+        Tee-Object -FilePath (Join-Path $logRoot 'harness.log') | Out-Host
     Stop-Process -Id $heldClient.Process.Id -Force
     Wait-Marker $hostPlayer 'SMOKE_LOADING_DISCONNECT_PASS players=2'
     Wait-Marker $survivor 'SMOKE_PLAYING players=2'
