@@ -2,6 +2,12 @@
 
 This is a test procedure, not a record of passed tests. Record the build revision, operating systems, transport, network arrangement, results and logs for each run. Automated results and remaining gaps are in [VERIFICATION.md](VERIFICATION.md).
 
+Use the matching ZIPs from [v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1); `BUILD-INFO.txt` records each build's source. Extract all files before launching.
+
+## One computer without Steam
+
+On Windows, run `Host-Local.cmd` and `Client-1-Local.cmd`, optionally `Client-2-Local.cmd`. On Mac, run `Host-LAN.command` and `Join-LAN.command`; press Enter at the address prompt to use `127.0.0.1`. The scripts use different profiles, with local UTP port 7777. Confirm the names in the lobby and click **Start game** on the host. Launch another client after the host enters gameplay to test late join. These ordinary launchers do not drive automated input.
+
 ## Choose the environment
 
 | Environment | Useful evidence | What it does not establish |
@@ -67,7 +73,8 @@ Repeat gameplay controls once as host and once as a remote client. Watch the oth
 
 | Check | Procedure and expected result |
 |---|---|
-| Menu input | Edit name/address/port, click Host/Join/Start. Only the host can start. Invalid port shows a readable message; an unreachable host eventually returns a readable failure instead of hanging. |
+| Menu input | In UTP, try ports `0`, `65536`, empty and nonnumeric text: each is rejected with a message that survives subsequent refreshes. Valid ports are 1–65535. In Steam, the UDP port is unused; Join requires a numeric lobby ID. Only the host can start. An unreachable host eventually returns a readable failure instead of hanging. |
+| Steam unavailable | With Steam closed, launch `--transport steam`. The first menu must explain how to start/sign in to Steam or relaunch with `--transport utp`; wait through several refreshes. A normal UTP launch must work without Steam. |
 | Scene start | Begin with both players in the lobby. Both enter the arena and become controllable; nobody remains indefinitely on the loading screen. |
 | Movement and look | WASD moves in the viewing direction, mouse rotates the view, Space jumps from the floor. Check walls/steps, diagonal movement and looking up/down. The other screen shows smooth movement without persistent snapping. |
 | Cursor and focus | Tab/Escape opens the player menu and releases the pointer. Close it to resume control. Alt-Tab away and back; movement must not remain stuck, clicks on UI must not fire gameplay actions, and the session must survive loss of focus. |
@@ -81,8 +88,11 @@ Repeat gameplay controls once as host and once as a remote client. Watch the oth
 | Client disconnect | A client holds a cube and leaves; repeat using Task Manager/Force Quit. The cube survives, drops and can be grabbed by a survivor. A new client can still join and interact. |
 | Kick and rejoin | The host kicks a client from the player menu. That client sees a reason and can join again. The surviving session keeps working. |
 | Host loss and restart | Host leaves; repeat by killing its process. Clients return to a usable menu with a reason. Start a new session and join again. Host migration is not expected. |
+| Loading disconnect | Start with multiple clients in the lobby. Disconnect one while the initial scene is loading; remaining participants must start. Record whether this was an ordinary timing attempt or a deliberately gated harness run. Unit tests of `LoadingBarrier` are separate evidence. |
 | Capacity | Set `--max-players 2`, fill both slots, then attempt a third connection. It must be rejected with a readable full-session message. Repeat with four slots if needed. |
 
 For an impaired-network check, run the existing UDP proxy with 75 ms delay each direction, 15 ms jitter and 3% loss as documented in the README. Repeat movement, grabbing, throwing and disconnect handling. Distinguish input/visual quality observations from the already automated state checks.
 
 For each failure, save the steps, expected/actual result, both player logs and a short recording if visual. Do not label any row PASS until someone performs it on the stated environment.
+
+For a reproducible UTP host-crash probe, use `tools/verify-host-crash.ps1` from source. It starts its own processes, waits for the client to play, kills only its recorded host PID and checks recovery within a timeout. A model/controller log is not proof that a human can read the rendered message; inspect that separately and record the result.

@@ -1,5 +1,7 @@
 # Steam transport
 
+Get the matching Windows/macOS ZIPs from [release v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1). Each archive includes launchers, native Steam libraries, AppID 480 and source information in `BUILD-INFO.txt`.
+
 Steam is optional and bundled for Windows x64 and macOS Universal (Intel and Apple Silicon). The default Unity Transport path supports multiple copies on one PC without Steam. Steam mode needs two different signed-in Steam accounts, internet access and matching game builds. A Windows PC and a Mac can use the same lobby across different networks. A separate Windows VM with its own Steam installation is an unverified alternative; two game windows in one ordinary Steam session do not create two Steam identities. See [environment choices](MANUAL-TESTING.md#two-steam-accounts).
 
 ## Launch and join
@@ -17,7 +19,7 @@ The default lobby is friends-only, named Dock Co-op, and limited to four members
 
 `Steam.cmd` on Windows and `Steam.command` on Mac select Steam networking directly, but do not guarantee overlay activation. Use them when testing by lobby ID: host a session, choose **Copy lobby ID**, then paste it into the guest's **IP address / Steam lobby ID** field and choose **Join session**. No IP address or port forwarding is needed. Copying an ID does not grant access to a private, invitation-only lobby.
 
-If Steam initialization fails, the game presents a readable message. Start and sign in to Steam, then retry, or relaunch with `--transport utp`. No application restart through Steam is forced during development.
+The UDP port field is hidden in Steam mode and does not block Host/Join; Join still requires a numeric Steam lobby ID. Invalid input remains readable after the menu refreshes. If Steam initialization fails, the first menu presents a persistent message: **Steam unavailable. Start Steam and sign in, or restart with --transport utp.** Start/sign in and retry Host/Join, or relaunch in UTP. The game does not switch transports automatically. For an overlay, use the Steam-library launch procedure above.
 
 ### Invitation button and overlay availability
 
@@ -50,6 +52,8 @@ The shared `IGameStats` implementation is deliberately a logging stub, allowed b
 The adapter uses matching Facepunch 2.5.2 managed/native dependencies for both platforms. On 3 November 2026, a tester confirmed two distinct Steam accounts joining the same lobby on Windows and macOS Ventura 13.2.1 across different networks, entering the game and exercising the controls. The host log also records remote-client item requests and ownership changes. The Mac was operated through RustDesk. Full evidence and remaining cases are in [VERIFICATION.md](VERIFICATION.md#manual-steam-session--3-november-2026).
 
 A follow-up with both Windows and Mac builds confirmed that launching Windows through the Steam library enabled Shift+Tab and the in-game invitation button. An invitation sent through Steam's friends menu connected the other player across platforms, and host Kick worked. This does not establish an independent Mac Shift+Tab/button check, private-lobby access, the separate Join Game action, a direct-versus-SDR route, or forced-crash recovery over Steam. Lobby-ID join was verified separately; the baseline automated multi-client tests use UTP.
+
+In another tester-reported Steam session, two players roughly 1,000 km apart observed about 100 ms application RTT. No route or repeated jitter/loss profile was recorded. A later tester-reported forced host termination returned a client to the join screen, but its transport, build SHA and visible reason were not supplied; it cannot be attributed to Steam. See the [current verification scope](VERIFICATION.md#v011-release-verification--5-november-2026).
 
 Sources: [pinned Unity community transport](https://github.com/Unity-Technologies/multiplayer-community-contributions/tree/0fab638470379ace12b0149dfb41c043d23dbce5/Transports/com.community.netcode.transport.facepunch), [Facepunch initialization](https://wiki.facepunch.com/steamworks/SteamClient.Init), [lobby creation](https://wiki.facepunch.com/steamworks/SteamMatchmaking.CreateLobbyAsync), [lobby join requests](https://wiki.facepunch.com/steamworks/SteamFriends.OnGameLobbyJoinRequested), [Valve matchmaking and lobbies](https://partner.steamgames.com/doc/features/multiplayer/matchmaking), [Valve rich presence](https://partner.steamgames.com/doc/features/enhancedrichpresence).
 

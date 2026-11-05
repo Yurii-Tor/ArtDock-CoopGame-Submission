@@ -1,8 +1,16 @@
-Dock Co-op - macOS Universal (Intel and Apple Silicon)
+Dock Co-op v0.1.1 - macOS Universal (Intel and Apple Silicon)
 
-Requires macOS 12 or newer.
+Requires macOS 12 or newer. Unity is not required to run the build.
+Extract the full ZIP. BUILD-INFO.txt records the source SHA.
 
-Recommended review: Steam on Mac + Windows (different networks supported).
+LOCAL TEST - one Mac, no Steam:
+Run Host-LAN.command, then Join-LAN.command. Press Enter at the address
+prompt to accept 127.0.0.1. The scripts use separate profiles and UTP port 7777.
+Confirm both players in the lobby, then click Start game on the host.
+For two computers on one LAN, enter the host's actual LAN address instead.
+The per-app macOS approval below also applies to local launch.
+
+STEAM TEST - Mac + Windows (different networks supported):
 
 1. Extract the whole ZIP; keep DockCoop.app, steam_appid.txt and other files together.
 2. Start Steam on both computers and sign in with two different accounts.
@@ -32,11 +40,12 @@ networking directly but does not guarantee overlay activation.
 Alternative: host > Copy lobby ID; guest pastes the numeric ID into
 IP address / Steam lobby ID (replace 127.0.0.1), then Join session.
 This works without the overlay. No VPN, shared LAN or port forwarding is needed.
+Steam mode hides the unused UDP port field. If Steam is unavailable, the menu
+explains how to start/sign in to Steam or restart with --transport utp.
 
 The bundled steam_appid.txt uses Valve's test AppID 480.
-For local/IP testing without Steam, open DockCoop.app directly or run
-Host-LAN.command / Join-LAN.command. In that mode use the host's actual
-LAN/VPN address; 127.0.0.1 is only for copies running on the same Mac.
+Opening DockCoop.app directly uses UTP by default. For multiple local copies,
+use the separate-profile launchers above. 127.0.0.1 is only for one Mac.
 
 Controls: WASD move, mouse look, Space jump, F spawn cube, E grab/drop,
 right mouse button throw, X delete held cube, C change player color,
@@ -54,3 +63,5 @@ docs/VERIFICATION.md for full evidence and remaining checks.
 Default log: ~/Library/Logs/Yurii Tor/Dock Co-op/Player.log
 Source and the manual testing checklist:
 https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission
+Release and SHA-256 checksums:
+https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1
