@@ -6,7 +6,8 @@ Runnable Windows x64 and Universal macOS builds for the ArtDock assignment. Unit
 
 - [Windows x64](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Windows-v0.1.1.zip)
 - [macOS Universal, macOS 12+](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-macOS-v0.1.1.zip)
-- [Scripted UTP demonstration](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4)
+- [Submission video — local Windows and cross-platform Steam](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Submission-v0.1.1.mp4)
+- [Earlier scripted UTP capture](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4)
 - [SHA-256 checksums](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/SHA256SUMS.txt)
 
 Each ZIP contains the executable/app, data, native Steam libraries, AppID 480, launchers, current documentation and `BUILD-INFO.txt` with the source SHA and Unity version. macOS binaries and shell launchers retain Unix executable permissions. The macOS development build is not Apple-notarized; follow the per-app approval instructions.
@@ -30,6 +31,8 @@ See [VERIFICATION.md](VERIFICATION.md) for release checks and historical tester-
 
 The release candidate passed all 32 policy tests, fresh Windows/macOS builds, UTP approval and impaired gameplay suites, controlled host-crash recovery with rendered menu feedback, a three-process loading-disconnect test, and menu validation with Steam running or closed. Rendered frames confirm the startup error and invalid-port feedback are readable. Final published-build/download verification is recorded on the GitHub release page.
 
-The video is a scripted, accelerated UTP recording with no audio or Steam footage. It is not the complete requested Steam demonstration. The verification record lists missing footage and unperformed checks. The author's approximate effort is 4 hours of implementation/review plus 2–3 hours of manual testing/network troubleshooting: about 6–7 person-hours overall.
+The submission video shows three Windows game windows (one host and two clients) over local UTP and a two-account Steam session on Windows and macOS. It includes English chapter labels, captions, an original instrumental score, and a separately labelled v0.1.1 scripted host-crash excerpt. See the [video coverage and build provenance](VERIFICATION.md#submission-video--6-november-2026).
+
+The author estimates 4 hours of implementation and review plus 2–3 hours of manual testing and network troubleshooting, about 6–7 person-hours overall.
 
 v0.1.0 remains unchanged as a historical prerelease. Host migration, regional relays and new infrastructure are not part of this release.
