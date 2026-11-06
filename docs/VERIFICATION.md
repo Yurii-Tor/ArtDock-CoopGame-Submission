@@ -2,7 +2,7 @@
 
 ## v0.1.1 release verification — 5 November 2026
 
-Runnable artifacts are published with [v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1): `DockCoop-Windows-v0.1.1.zip`, `DockCoop-macOS-v0.1.1.zip`, `DockCoop-Demo-v0.1.1.mp4` and `SHA256SUMS.txt`. The ZIPs include platform launchers, documentation, Steam AppID 480 and `BUILD-INFO.txt`; the latter records the exact source commit and Unity version. The macOS build is Universal, requires macOS 12+, and is not notarized. No Unity installation is needed to play.
+Runnable artifacts are published with [v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1): `DockCoop-Windows-v0.1.1.zip`, `DockCoop-macOS-v0.1.1.zip`, `DockCoop-Submission-v0.1.1.mp4`, the earlier scripted `DockCoop-Demo-v0.1.1.mp4` and `SHA256SUMS.txt`. The ZIPs include platform launchers, documentation, Steam AppID 480 and `BUILD-INFO.txt`; the latter records the exact source commit and Unity version. The macOS build is Universal, requires macOS 12+, and is not notarized. No Unity installation is needed to play.
 
 This release fixes menu validation and feedback: Steam does not validate an unused UDP port, UTP still requires 1–65535, invalid input survives UI refresh, and unavailable Steam initialization is explained on the first menu. Historical r2/r3 results below are not relabelled as tests of the new binaries.
 
@@ -23,6 +23,16 @@ These runs validate the release candidate before integration. The published ZIPs
 
 Reproduce the new probes with `tools/verify-host-crash.ps1 -Capture`, `tools/verify-loading-disconnect.ps1` and `tools/verify-ui.ps1 -SteamAvailable -Capture`. Run `tools/verify-ui.ps1 -Capture` with Steam closed for unavailable-Steam startup and normal UTP startup. The scripts use separate profiles, bounded timeouts and clean up only the processes they create. The loading gate is enabled only by the test flags; it is a real three-process disconnect/barrier test, not an observation of a naturally slow disk load.
 
+### Submission video — 6 November 2026
+
+The [submission video](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Submission-v0.1.1.mp4) combines two manual recordings with English captions and an original instrumental score.
+
+- **Windows / local UTP:** one host and two clients in three game windows, start, late join, replicated colour, shared cube grab and throw, client leave, and host leave. The in-game player list and host-only Kick controls are visible.
+- **Steam / Windows and macOS:** library launch, Overlay invitation, acceptance on macOS, shared lobby, player RTT and Kick controls, match start, and shared cube physics. The RTT shown belongs to this recorded session.
+- **Scripted v0.1.1 check:** a labelled excerpt from the downloaded Windows build shows the client returning to the menu with the host-loss message and Host/Join controls after the host process is terminated.
+
+The manual Windows recording was made from a folder labelled `Steam-r3`. The exact executable SHAs of the manual recordings cannot be established from the footage. The published ZIP checks and the labelled host-crash excerpt cover the tagged v0.1.1 build.
+
 ### Additional tester reports recorded for this release
 
 - **Forced host-process termination:** Yurii reports using PowerShell `Stop-Process -Id <hostPid> -Force`; the client returned to the lobby search/join screen. This is tester-reported. The transport, executable SHA and visible reason were not supplied. The numeric example `1234` is not a reusable PID. This report does not establish a known-build Steam crash test or the wording/visibility of its disconnect reason.
@@ -34,7 +44,7 @@ Reproduce the new probes with `tools/verify-host-crash.ps1 -Capture`, `tools/ver
 - Direct UTP between two physical computers over LAN/public IP remains separate from the verified remote Steam path and local multi-process UTP tests.
 - Steam private-lobby permissions, the separate **Join Game** action, an independent Mac Shift+Tab/button check, and forced host termination with a recorded Steam transport/build/reason remain unverified. AppID 480 does not permit configuring this project's localized Rich Presence display.
 - A detailed per-control matrix for both roles, physical input directly at the Mac, subjective smoothness under varied connections, route diagnostics and bandwidth profiling remain incomplete. The reported Mac session used RustDesk.
-- The available [demo video](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4) is an automated UTP recording with host and late-client views, accelerated capture and no audio. It does not cover Steam account/lobby/invitation UI. A complete assignment video still needs a Steam setup/join segment with two accounts, visible player list/RTT and kick, plus clear views of the requested 2–3 participants, late join, grab/throw, client departure and host departure. The existing automated footage must be identified as scripted rather than a manual session.
+- The submission video shows the Kick control and a client leaving after throwing a cube. The manual test notes and gameplay harness document the kick outcome and forced disconnect while holding an item.
 
 **Effort:** the author's approximate estimate is **4 hours for implementation and review**, plus **2–3 hours for manual testing and network troubleshooting**, about **6–7 person-hours in total**. This is a self-reported estimate, not a calculation from commit timestamps. The historical 1.5-hour figure below covered only the initial implementation/debugging/automated-checking stage and is not added again to the total.
 

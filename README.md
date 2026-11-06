@@ -4,6 +4,8 @@ A 2–4 player Unity physics prototype for the ArtDock network developer assignm
 
 **[Download v0.1.1](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1)** — [Windows x64 ZIP](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Windows-v0.1.1.zip) · [macOS Universal ZIP](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-macOS-v0.1.1.zip) · [SHA-256 checksums](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/SHA256SUMS.txt). **Unity is not needed to run these builds.** Extract the whole ZIP and keep its files together. macOS requires version 12 or newer; the app supports Intel and Apple Silicon.
 
+**[Watch the submission demo](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Submission-v0.1.1.mp4)** — Windows local UTP with three game windows (one host and two clients), followed by a Steam invitation and shared gameplay on Windows and macOS.
+
 ## Quick start: one Windows PC, no Steam
 
 1. Run **`Host-Local.cmd`**, then **`Client-1-Local.cmd`** from the extracted Windows folder. Optionally run **`Client-2-Local.cmd`** for a third player.
@@ -115,7 +117,7 @@ Possible development after this assignment:
 
 ## Delivery status
 
-The [release](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1) is the runnable delivery; v0.1.0 remains available as a historical prerelease. The [available video](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/download/v0.1.1/DockCoop-Demo-v0.1.1.mp4) covers scripted UTP gameplay, not the complete requested Steam demonstration. [Verification and video coverage](docs/VERIFICATION.md) list the remaining footage and checks.
+The [v0.1.1 release](https://github.com/Yurii-Tor/ArtDock-CoopGame-Submission/releases/tag/v0.1.1) contains the runnable builds and submission video. [Verification and video coverage](docs/VERIFICATION.md#submission-video--6-november-2026) describe the captured scenarios and identify the separate scripted host-crash check.
 
 Work was AI-assisted. The author estimates **4 hours for implementation and review**, plus **2–3 hours for manual testing and network troubleshooting**, about **6–7 person-hours overall**. The historical 1.5-hour initial-stage figure in the verification record is included in that estimate, not an additional total.
 
